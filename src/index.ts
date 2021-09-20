@@ -7,6 +7,7 @@ export { UniformTexture } from './UniformTexture'
 export { Shader } from './Shader'
 export { Geometry } from './Geometry'
 export { Mesh } from './Mesh'
+export { GLTFParser } from './GLTFParser'
 
 export {
   Transform,

@@ -25,16 +25,22 @@ export class Mesh extends SceneObject {
       switch (type as string) {
         case 'mat4x4<f32>':
           acc += 16 * Float32Array.BYTES_PER_ELEMENT
+          break
         case 'mat3x3<f32>':
           acc += 12 * Float32Array.BYTES_PER_ELEMENT
+          break
         case 'vec4<f32>':
           acc += 4 * Float32Array.BYTES_PER_ELEMENT
+          break
         case 'vec3<f32>':
           acc += 3 * Float32Array.BYTES_PER_ELEMENT
+          break
         case 'vec2<f32>':
           acc += 2 * Float32Array.BYTES_PER_ELEMENT
+          break
         case '<f32>':
           acc += Float32Array.BYTES_PER_ELEMENT
+          break
       }
       return acc
     }, 0)
@@ -54,6 +60,8 @@ export class Mesh extends SceneObject {
 
       fragmentShaderSnippetHead,
       fragmentShaderSnippetMain,
+
+      multisample = {},
 
       presentationFormat = 'bgra8unorm',
       primitiveType = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
@@ -107,9 +115,6 @@ export class Mesh extends SceneObject {
     fragmentShader.addHeadSnippet(fragmentShaderSnippetHead)
     fragmentShader.addMainFnSnippet(fragmentShaderSnippetMain)
 
-    console.log(vertexShader.source)
-    console.log(fragmentShader.source)
-
     // console.log(vertexShader.source)
     // console.log(fragmentShader.source)
 
@@ -154,6 +159,7 @@ export class Mesh extends SceneObject {
           topology: primitiveType,
           stripIndexFormat: geometry.stripIndexFormat,
         },
+        multisample,
         depthStencil: {
           format: 'depth24plus',
           depthWriteEnabled: true,
@@ -196,7 +202,7 @@ export class Mesh extends SceneObject {
           this.normalMatrix as ArrayBuffer,
         )
       this.shouldUpdate = false
-      console.log('updated matrix')
+      // console.log('updated matrix')
     }
 
     this.uboBindGroup
@@ -224,6 +230,8 @@ interface MeshProps {
 
   fragmentShaderSnippetHead: string
   fragmentShaderSnippetMain: string
+
+  multisample?: GPUMultisampleState
   /**
    * @default 'bgra8unorm'
    */

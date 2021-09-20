@@ -53,7 +53,7 @@ export class Shader {
 
   addUniformInputs(inputDefinitions: [string, Uniform][]): this {
     this.source += `
-      struct UniformsInput {
+      [[block]] struct UniformsInput {
         ${inputDefinitions.reduce((acc, [key, { type }]) => {
           acc += `${key}: ${type};`
           return acc
@@ -70,14 +70,7 @@ export class Shader {
       // .filter(([key]) => key !== ATTRIB_NAME_POSITION)
       .reduce((acc, [key, { bindPointIdx, format }]) => {
         const inputFormat = Shader.getVertexInputFormat(format)
-
         let offsetBindPointIdx = bindPointIdx
-        // if (this.stage === GPUShaderStage.VERTEX) {
-        //   // We need to offset them by 1, since worldPosition is at location(0)
-        //   offsetBindPointIdx = bindPointIdx
-        // } else if (this.stage === GPUShaderStage.FRAGMENT) {
-        //   offsetBindPointIdx = bindPointIdx
-        // }
         acc += `[[location(${offsetBindPointIdx})]] ${key}: ${inputFormat};\n`
         return acc
       }, '')
