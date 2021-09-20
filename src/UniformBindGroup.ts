@@ -88,7 +88,6 @@ export class UniformBindGroup {
       })
     }
 
-    // debugger
     this.bindGroup = this.device.createBindGroup({
       layout: pipeline.getBindGroupLayout(this.bindingIndex),
       entries: entries,

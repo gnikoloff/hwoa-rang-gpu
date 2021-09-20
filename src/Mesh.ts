@@ -61,6 +61,9 @@ export class Mesh extends SceneObject {
     const vertexShader = new Shader(device as GPUDevice, vertexShaderSource)
     const fragmentShader = new Shader(device as GPUDevice, fragmentShaderSource)
 
+    // console.log(vertexShader.source)
+    // console.log(fragmentShader.source)
+
     this.uboBindGroup = new UniformBindGroup(device, 0)
     // First bind group with dedicated first binding containing required uniforms:
 
@@ -84,35 +87,40 @@ export class Mesh extends SceneObject {
         this.uboBindGroup.writeToUBO(1, 0, value)
       })
 
-    this.pipeline = gpuPipelineFactory(device, {
-      vertex: {
-        module: vertexShader.shaderModule,
-        entryPoint: Shader.entryFunction,
-        buffers: geometry.getVertexBuffersLayout(),
+    this.pipeline = gpuPipelineFactory(
+      device,
+      {
+        vertex: {
+          module: vertexShader.shaderModule,
+          entryPoint: Shader.entryFunction,
+          buffers: geometry.getVertexBuffersLayout(),
+        },
+        fragment: {
+          module: fragmentShader.shaderModule,
+          entryPoint: Shader.entryFunction,
+          targets: [
+            {
+              format: presentationFormat,
+            },
+          ],
+        },
+        primitive: {
+          topology: primitiveType,
+          stripIndexFormat: geometry.stripIndexFormat,
+        },
+        depthStencil: {
+          format: 'depth24plus',
+          depthWriteEnabled: true,
+          depthCompare: 'less',
+        },
       },
-      fragment: {
-        module: fragmentShader.shaderModule,
-        entryPoint: Shader.entryFunction,
-        targets: [
-          {
-            format: presentationFormat,
-          },
-        ],
-      },
-      primitive: {
-        topology: primitiveType,
-        stripIndexFormat: geometry.stripIndexFormat,
-      },
-      depthStencil: {
-        format: 'depth24plus',
-        depthWriteEnabled: true,
-        depthCompare: 'less',
-      },
-    })
+      textures,
+    )
 
     textures.map(({ imageBitmap }, i) => {
-      this.uboBindGroup.addSampler(2 + i)
-      this.uboBindGroup.addTexture(2 + i + 1, imageBitmap)
+      const numBindOffset = uboIndividualPropsByteLength ? 2 : 1
+      this.uboBindGroup.addSampler(numBindOffset + i)
+      this.uboBindGroup.addTexture(numBindOffset + i + 1, imageBitmap)
     })
 
     this.uboBindGroup.init(this.pipeline)
@@ -121,7 +129,6 @@ export class Mesh extends SceneObject {
   render(
     renderPass: GPURenderPassEncoder,
     camera: PerspectiveCamera | OrthographicCamera,
-    updateCameraMatrix = false,
   ) {
     if (this.shouldUpdate) {
       // this.updateModelMatrix()

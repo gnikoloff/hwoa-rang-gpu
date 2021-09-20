@@ -1,10 +1,26 @@
 const pipelinesMap = new Map()
 
+const simpleHash = (str) => {
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i)
+    hash = (hash << 5) - hash + char
+    hash &= hash // Convert to 32bit integer
+  }
+  return new Uint32Array([hash])[0].toString(36)
+}
+
 export const gpuPipelineFactory = (
   device: GPUDevice,
   pipelineDefinition: GPURenderPipelineDescriptor,
+  textures,
 ): GPURenderPipeline => {
-  const pipelineDefString = JSON.stringify(pipelineDefinition)
+  const pipelineDefString = simpleHash(
+    JSON.stringify({
+      ...pipelineDefinition,
+      textures,
+    }),
+  )
   let pipeline = pipelinesMap.get(pipelineDefString)
   if (!pipeline) {
     pipeline = device.createRenderPipeline(pipelineDefinition)
