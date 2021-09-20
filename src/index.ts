@@ -7,3 +7,11 @@ export { UniformTexture } from './UniformTexture'
 export { Shader } from './Shader'
 export { Geometry } from './Geometry'
 export { Mesh } from './Mesh'
+
+export {
+  SceneObject,
+  GeometryUtils,
+  PerspectiveCamera,
+  OrthographicCamera,
+  CameraController,
+} from './lib/hwoa-rang-gl'

@@ -2,7 +2,7 @@ import {
   SceneObject,
   OrthographicCamera,
   PerspectiveCamera,
-} from './lib/hwoa-rang-gl/dist/esm/index'
+} from './lib/hwoa-rang-gl'
 
 import { PRIMITIVE_TOPOLOGY_TRIANGLE_LIST } from './constants'
 
