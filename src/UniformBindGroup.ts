@@ -42,8 +42,7 @@ export class UniformBindGroup {
     return this
   }
 
-  addSampler(samplerIdx: number, samplerOptions = {}): this {
-    const sampler = new UniformSampler(this.device, samplerOptions)
+  addSampler(samplerIdx: number, sampler: UniformSampler): this {
     this.samplers.set(samplerIdx, sampler)
     return this
   }

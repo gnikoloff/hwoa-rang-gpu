@@ -10,6 +10,7 @@ import { Geometry } from './Geometry'
 import { gpuPipelineFactory } from './gpu-pipeline-factory'
 import { Shader } from './Shader'
 import { UniformBindGroup } from './UniformBindGroup'
+import { UniformSampler } from './UniformSampler'
 
 export class Mesh extends SceneObject {
   private device: GPUDevice
@@ -46,8 +47,14 @@ export class Mesh extends SceneObject {
       geometry,
       uniforms = {},
       textures = [],
-      vertexShaderSource,
-      fragmentShaderSource,
+      samplers = [],
+
+      vertexShaderSnippetHead,
+      vertexShaderSnippetMain,
+
+      fragmentShaderSnippetHead,
+      fragmentShaderSnippetMain,
+
       presentationFormat = 'bgra8unorm',
       primitiveType = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
     } = props
@@ -58,8 +65,50 @@ export class Mesh extends SceneObject {
     this.geometry = geometry
     this.uniforms = uniforms
 
-    const vertexShader = new Shader(device as GPUDevice, vertexShaderSource)
-    const fragmentShader = new Shader(device as GPUDevice, fragmentShaderSource)
+    const uboIndividualPropsByteLength = Mesh.getUBOByteLength(
+      Object.values(uniforms),
+    )
+    const numBindOffset = uboIndividualPropsByteLength ? 2 : 1
+
+    const vertexShader = new Shader(
+      device as GPUDevice,
+      GPUShaderStage.VERTEX as GPUShaderStageFlags,
+    )
+    if (uboIndividualPropsByteLength) {
+      vertexShader.addUniformInputs(Object.entries(uniforms))
+    }
+    vertexShader.addVertexInputs(geometry.getVertexBuffers())
+    vertexShader.addHeadSnippet(vertexShaderSnippetHead)
+    vertexShader.addMainFnSnippet(vertexShaderSnippetMain)
+
+    const fragmentShader = new Shader(
+      device as GPUDevice,
+      GPUShaderStage.FRAGMENT as GPUShaderStageFlags,
+    )
+    if (uboIndividualPropsByteLength) {
+      fragmentShader.addUniformInputs(Object.entries(uniforms))
+    }
+    fragmentShader.addVertexInputs(geometry.getVertexBuffers())
+    fragmentShader.addTextureInputs(
+      textures.map(({ name }, i: number) => ({
+        bindIdx: numBindOffset + i,
+        name: name,
+      })),
+    )
+    fragmentShader.addSamplerInputs(
+      samplers.map((sampler: UniformSampler, i: number) => {
+        const bindIdx = numBindOffset + textures.length + i
+        return {
+          bindIdx,
+          name: sampler.name,
+        }
+      }),
+    )
+    fragmentShader.addHeadSnippet(fragmentShaderSnippetHead)
+    fragmentShader.addMainFnSnippet(fragmentShaderSnippetMain)
+
+    console.log(vertexShader.source)
+    console.log(fragmentShader.source)
 
     // console.log(vertexShader.source)
     // console.log(fragmentShader.source)
@@ -73,9 +122,6 @@ export class Mesh extends SceneObject {
     // 4. model normal matrix
     this.uboBindGroup.addUBO(0, 16 * 4 * Float32Array.BYTES_PER_ELEMENT)
 
-    const uboIndividualPropsByteLength = Mesh.getUBOByteLength(
-      Object.values(uniforms),
-    )
     if (uboIndividualPropsByteLength) {
       // Second binding with optional uniforms
       this.uboBindGroup.addUBO(1, uboIndividualPropsByteLength)
@@ -92,12 +138,12 @@ export class Mesh extends SceneObject {
       {
         vertex: {
           module: vertexShader.shaderModule,
-          entryPoint: Shader.entryFunction,
+          entryPoint: Shader.ENTRY_FUNCTION,
           buffers: geometry.getVertexBuffersLayout(),
         },
         fragment: {
           module: fragmentShader.shaderModule,
-          entryPoint: Shader.entryFunction,
+          entryPoint: Shader.ENTRY_FUNCTION,
           targets: [
             {
               format: presentationFormat,
@@ -118,9 +164,13 @@ export class Mesh extends SceneObject {
     )
 
     textures.map(({ imageBitmap }, i) => {
-      const numBindOffset = uboIndividualPropsByteLength ? 2 : 1
-      this.uboBindGroup.addSampler(numBindOffset + i)
-      this.uboBindGroup.addTexture(numBindOffset + i + 1, imageBitmap)
+      const bindPointIdx = numBindOffset + i
+      this.uboBindGroup.addTexture(bindPointIdx, imageBitmap)
+    })
+
+    samplers.map((sampler: UniformSampler, i) => {
+      const bindPointIdx = numBindOffset + textures.length + i
+      this.uboBindGroup.addSampler(bindPointIdx, sampler)
     })
 
     this.uboBindGroup.init(this.pipeline)
@@ -167,9 +217,13 @@ export class Mesh extends SceneObject {
 interface MeshProps {
   geometry: Geometry
   uniforms?: { [name: string]: Uniform }
-  textures?: [{ sampler: {}; imageBitmap: ImageBitmap }]
-  vertexShaderSource: string
-  fragmentShaderSource: string
+  textures?: [{ name: string; imageBitmap: ImageBitmap }]
+  samplers?: UniformSampler[]
+  vertexShaderSnippetHead: string
+  vertexShaderSnippetMain: string
+
+  fragmentShaderSnippetHead: string
+  fragmentShaderSnippetMain: string
   /**
    * @default 'bgra8unorm'
    */

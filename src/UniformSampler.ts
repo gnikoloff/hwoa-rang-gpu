@@ -9,6 +9,7 @@ const WEBGL_TEXTURE_MIRRORED_REPEAT = 0x8370
 export class UniformSampler {
   private device: GPUDevice
   sampler: GPUSampler
+  name: string
 
   static parseGLFilterMode(filterMode: GLenum) {
     // if (filterMode === WEBGL_FILTER_NEAREST) {
@@ -36,13 +37,18 @@ export class UniformSampler {
     return 'repeat'
   }
 
-  constructor(device: GPUDevice, samplerOptions) {
+  constructor(device: GPUDevice, name: string, samplerOptions = {}) {
     this.device = device
+    this.name = name
 
     let {
+      //@ts-ignore
       addressModeU = 'repeat',
+      //@ts-ignore
       addressModeV = 'repeat',
+      //@ts-ignore
       magFilter = 'nearest',
+      //@ts-ignore
       minFilter = 'nearest',
     } = samplerOptions
 
