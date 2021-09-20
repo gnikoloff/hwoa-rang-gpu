@@ -9,6 +9,7 @@ export { Geometry } from './Geometry'
 export { Mesh } from './Mesh'
 
 export {
+  Transform,
   SceneObject,
   GeometryUtils,
   PerspectiveCamera,
