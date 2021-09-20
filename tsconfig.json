@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "explainFiles": true,
     "module": "ES6",
     "target": "ES6",
     "allowJs": true,
@@ -7,17 +8,19 @@
     "strict": true,
     // "inlineSourceMap": true,
     "allowSyntheticDefaultImports": true,
-    "strictNullChecks": false,
+    "strictNullChecks": true,
     "lib": ["ES2016", "ES2017", "DOM"],
     "noImplicitAny": false,
     "declaration": true,
+    "declarationDir": "./dist/@types/",
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "typeRoots": [
-      "./npm_modules/@types/"
+      "./node_modules/@webgpu/types",
+      "./npm_modules/@types/",
     ]
   },
   "include": [
     "src",
-  ],
+  ]
 }

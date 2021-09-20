@@ -1,8 +1,17 @@
 {
   "name": "frontend-boilerplate",
   "version": "0.0.1",
-  "description": "Boilerplate skeleton for writing frontend app in rollup, typescript & express",
-  "main": "index.js",
+  "description": "WebGPU Rendering Library",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/@types/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    "require": "./dist/cjs/index.js",
+    "import": "./dist/esm/index.js"
+  },
   "scripts": {
     "lint": "eslint src",
     "watch": "rollup --watch --c",
@@ -38,6 +47,7 @@
     "rollup-plugin-uglify": "^6.0.4"
   },
   "devDependencies": {
+    "@webgpu/types": "^0.1.6",
     "eslint": "^7.28.0",
     "npm-run-all": "^4.1.5",
     "typescript": "^4.3.2"

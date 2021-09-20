@@ -10,9 +10,14 @@ import replace from '@rollup/plugin-replace'
 import { uglify } from 'rollup-plugin-uglify'
 import strip from '@rollup/plugin-strip'
 
+import pkg from './package.json'
+
 export default {
   input: 'src/index.ts',
-  output: [{ file: 'dist/bundle.js', format: 'iife' }],
+  output: [
+    { file: pkg.main, name: 'hwoaRangGPU', format: 'umd', sourcemap: true },
+    { file: pkg.module, format: 'es', sourcemap: true },
+  ],
   external: [],
   watch: {
     include: 'src/**',
