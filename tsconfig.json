@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "explainFiles": true,
     "module": "ES6",
     "target": "ES6",
     "allowJs": true,
@@ -12,15 +11,18 @@
     "lib": ["ES2016", "ES2017", "DOM"],
     "noImplicitAny": false,
     "declaration": true,
-    "declarationDir": "./dist/@types/",
+    "declarationDir": "./dist/@types",
     "moduleResolution": "node",
-    "resolveJsonModule": true,
     "typeRoots": [
       "./node_modules/@webgpu/types",
-      "./npm_modules/@types/",
+      "./npm_modules/@types/"
     ]
   },
   "include": [
-    "src",
+    "src/lib/hwoa-rang-gl",
+  ],
+  "exclude": [
+    "src/lib/hwoa-rang-gl/docs",
+    "src/lib/hwoa-rang-gl/dist"
   ]
 }

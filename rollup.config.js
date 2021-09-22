@@ -36,8 +36,8 @@ export default {
       main: true,
     }),
     typescript({
-      // useTsconfigDeclarationDir: true,
-      // declarationDir: 'dist/src',
+      useTsconfigDeclarationDir: true,
+      declarationDir: 'dist/src',
     }),
     sourcemaps(),
     copy({

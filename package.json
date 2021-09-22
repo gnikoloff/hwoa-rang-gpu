@@ -1,10 +1,10 @@
 {
-  "name": "frontend-boilerplate",
+  "name": "hwoa-rang-gpu",
   "version": "0.0.1",
-  "description": "WebGPU Rendering Library",
+  "description": "WebGPU Compute and Rendering Library",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
-  "types": "dist/@types/index.d.ts",
+  "types": "dist/@types",
   "files": [
     "dist"
   ],
@@ -46,7 +46,8 @@
     "rollup-plugin-import-css": "^2.0.1",
     "rollup-plugin-sourcemaps": "^0.6.3",
     "rollup-plugin-typescript2": "^0.30.0",
-    "rollup-plugin-uglify": "^6.0.4"
+    "rollup-plugin-uglify": "^6.0.4",
+    "tslib": "^2.3.1"
   },
   "devDependencies": {
     "@webgpu/types": "^0.1.6",
