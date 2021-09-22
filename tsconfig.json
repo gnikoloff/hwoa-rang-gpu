@@ -8,14 +8,14 @@
     // "inlineSourceMap": true,
     "allowSyntheticDefaultImports": true,
     "strictNullChecks": true,
-    "lib": ["ES2016", "ES2017", "DOM"],
+    "lib": ["es2017", "dom", "dom.iterable"],
     "noImplicitAny": false,
     "declaration": true,
     "declarationDir": "./dist/@types",
     "moduleResolution": "node",
     "typeRoots": [
-      "./node_modules/@webgpu/types",
-      "./npm_modules/@types/"
+      "./npm_modules/@types/",
+      "./node_modules/@webgpu/types"
     ]
   },
   "include": [
