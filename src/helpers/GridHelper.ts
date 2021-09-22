@@ -1,7 +1,12 @@
 import { Geometry, Mesh } from '..'
 
 export class GridHelper extends Mesh {
-  constructor(device: GPUDevice, radius: number, divisionsCount: number) {
+  constructor(
+    device: GPUDevice,
+    radius: number,
+    divisionsCount: number,
+    color = [0.5, 0.5, 0.5, 1],
+  ) {
     const geometry = new Geometry(device)
 
     const scaleX = radius / divisionsCount
@@ -50,6 +55,12 @@ export class GridHelper extends Mesh {
       multisample: {
         count: 4,
       },
+      uniforms: {
+        color: {
+          type: 'vec4<f32>',
+          value: new Float32Array(color),
+        },
+      },
       vertexShaderSnippetHead: ``,
       vertexShaderSnippetMain: `
         let worldPosition: vec4<f32> = transform.modelMatrix * input.position;
@@ -59,7 +70,7 @@ export class GridHelper extends Mesh {
       `,
       fragmentShaderSnippetHead: ``,
       fragmentShaderSnippetMain: `
-        return vec4<f32>(1.0);
+        return inputUBO.color;
       `,
     })
     this.setRotation({
