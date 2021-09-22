@@ -13,14 +13,21 @@ const simpleHash = (str) => {
 export const gpuPipelineFactory = (
   device: GPUDevice,
   pipelineDefinition: GPURenderPipelineDescriptor,
+  uniforms,
   textures,
 ): GPURenderPipeline => {
-  const pipelineDefString = simpleHash(
-    JSON.stringify({
-      ...pipelineDefinition,
-      textures,
-    }),
-  )
+  // const pipelineDefString = simpleHash(
+  //   JSON.stringify({
+  //     ...pipelineDefinition,
+  //     uniforms,
+  //     textures,
+  //   }),
+  // )
+  const pipelineDefString = JSON.stringify({
+    ...pipelineDefinition,
+    uniforms,
+    textures,
+  })
   let pipeline = pipelinesMap.get(pipelineDefString)
   if (!pipeline) {
     pipeline = device.createRenderPipeline(pipelineDefinition)

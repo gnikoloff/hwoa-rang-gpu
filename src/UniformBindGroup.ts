@@ -35,7 +35,7 @@ export class UniformBindGroup {
   ): this {
     const ubo = this.uniformBlocks.get(uboIdx)
     if (!ubo) {
-      // ...
+      console.error('ubo not found')
       return this
     }
     ubo.write(byteOffset, data)

@@ -23,9 +23,9 @@ export class Shader {
   static getVertexInputFormat(format: GPUVertexFormat) {
     switch (format) {
       case 'float32':
-        return '<f32>'
+        return 'f32'
       case 'float32x2':
-        return 'vec4<f32>'
+        return 'vec2<f32>'
       case 'float32x3':
         return 'vec4<f32>'
       case 'float32x4':
