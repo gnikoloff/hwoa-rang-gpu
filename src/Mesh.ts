@@ -2,7 +2,11 @@ import {
   SceneObject,
   OrthographicCamera,
   PerspectiveCamera,
-} from './lib/hwoa-rang-gl'
+} from './lib/hwoa-rang-gl/src'
+
+// import { SceneObject } from './lib/hwoa-rang-gl/src/core/scene-object'
+// import { OrthographicCamera } from './lib/hwoa-rang-gl/src/camera/orthographic-camera'
+// import { PerspectiveCamera } from './lib/hwoa-rang-gl/src/camera/perspective-camera'
 
 import { PRIMITIVE_TOPOLOGY_TRIANGLE_LIST } from './constants'
 
@@ -46,26 +50,27 @@ export class Mesh extends SceneObject {
     }, 0)
   }
 
-  constructor(device: GPUDevice, props: MeshProps) {
-    super()
-
-    const {
+  constructor(
+    device: GPUDevice,
+    {
       geometry,
       uniforms = {},
       textures = [],
       samplers = [],
 
-      vertexShaderSnippetHead,
+      vertexShaderSnippetHead = '',
       vertexShaderSnippetMain,
 
-      fragmentShaderSnippetHead,
+      fragmentShaderSnippetHead = '',
       fragmentShaderSnippetMain,
 
       multisample = {},
 
       presentationFormat = 'bgra8unorm',
       primitiveType = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
-    } = props
+    }: MeshProps,
+  ) {
+    super()
 
     geometry.primitiveType = primitiveType
 
@@ -115,8 +120,8 @@ export class Mesh extends SceneObject {
     fragmentShader.addHeadSnippet(fragmentShaderSnippetHead)
     fragmentShader.addMainFnSnippet(fragmentShaderSnippetMain)
 
-    // console.log(vertexShader.source)
-    // console.log(fragmentShader.source)
+    console.log(vertexShader.source)
+    console.log(fragmentShader.source)
 
     this.uboBindGroup = new UniformBindGroup(device, 0)
     // First bind group with dedicated first binding containing required uniforms:
@@ -187,9 +192,8 @@ export class Mesh extends SceneObject {
     camera: PerspectiveCamera | OrthographicCamera,
   ) {
     if (this.shouldUpdate) {
-      // this.updateModelMatrix()
+      this.updateModelMatrix()
       this.updateWorldMatrix(this.parentNode?.worldMatrix || null)
-
       this.uboBindGroup
         .writeToUBO(
           0,
@@ -201,8 +205,6 @@ export class Mesh extends SceneObject {
           16 * 3 * Float32Array.BYTES_PER_ELEMENT,
           this.normalMatrix as ArrayBuffer,
         )
-      this.shouldUpdate = false
-      // console.log('updated matrix')
     }
 
     this.uboBindGroup
@@ -223,12 +225,12 @@ export class Mesh extends SceneObject {
 interface MeshProps {
   geometry: Geometry
   uniforms?: { [name: string]: Uniform }
-  textures?: [{ name: string; imageBitmap: ImageBitmap }]
+  textures?: { name: string; imageBitmap: ImageBitmap }[]
   samplers?: UniformSampler[]
-  vertexShaderSnippetHead: string
+  vertexShaderSnippetHead?: string
   vertexShaderSnippetMain: string
 
-  fragmentShaderSnippetHead: string
+  fragmentShaderSnippetHead?: string
   fragmentShaderSnippetMain: string
 
   multisample?: GPUMultisampleState

@@ -9,6 +9,8 @@ export { Geometry } from './Geometry'
 export { Mesh } from './Mesh'
 export { GLTFParser } from './GLTFParser'
 
+export { GridHelper } from './helpers/GridHelper'
+
 export {
   Transform,
   SceneObject,
@@ -16,4 +18,4 @@ export {
   PerspectiveCamera,
   OrthographicCamera,
   CameraController,
-} from './lib/hwoa-rang-gl'
+} from './lib/hwoa-rang-gl/src'
