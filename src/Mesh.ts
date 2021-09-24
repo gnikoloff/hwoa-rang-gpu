@@ -21,6 +21,7 @@ import { UniformSampler } from './UniformSampler'
 
 export class Mesh extends SceneObject {
   private device: GPUDevice
+  protected renderable = true
 
   geometry: Geometry
   pipeline: GPURenderPipeline
@@ -43,12 +44,19 @@ export class Mesh extends SceneObject {
       fragmentShaderSnippetMain,
 
       multisample = {},
+      depthStencil = {
+        format: 'depth24plus',
+        depthWriteEnabled: true,
+        depthCompare: 'less',
+      },
 
       presentationFormat = 'bgra8unorm',
       primitiveType = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
     }: MeshProps,
   ) {
     super()
+
+    console.log(depthStencil)
 
     geometry.primitiveType = primitiveType
 
@@ -189,11 +197,7 @@ export class Mesh extends SceneObject {
           stripIndexFormat: geometry.stripIndexFormat,
         },
         multisample,
-        depthStencil: {
-          format: 'depth24plus',
-          depthWriteEnabled: true,
-          depthCompare: 'less',
-        },
+        depthStencil,
       },
       uniforms,
       textures,
@@ -282,6 +286,7 @@ interface MeshProps {
   fragmentShaderSnippetMain: string
 
   multisample?: GPUMultisampleState
+  depthStencil?: GPUDepthStencilState
   /**
    * @default 'bgra8unorm'
    */
