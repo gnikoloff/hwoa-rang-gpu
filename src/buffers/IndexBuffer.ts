@@ -1,16 +1,17 @@
-export class IndexBuffer {
-  device: GPUDevice
-  buffer: GPUBuffer
-  length: number
-  typedArray: Uint16Array | Uint32Array
+import { Buffer } from './Buffer'
+
+export class IndexBuffer extends Buffer {
+  public itemsCount: number
+  public typedArray: Uint16Array | Uint32Array
 
   get isInt16() {
     return this.typedArray instanceof Uint16Array
   }
 
   constructor(device: GPUDevice, typedArray: Uint16Array | Uint32Array) {
+    super()
     this.device = device
-    this.length = typedArray.length
+    this.itemsCount = typedArray.length
     this.typedArray = typedArray
 
     this.buffer = device.createBuffer({
@@ -24,15 +25,13 @@ export class IndexBuffer {
     } else {
       new Uint32Array(this.buffer.getMappedRange()).set(typedArray)
     }
+
     this.buffer.unmap()
   }
 
-  setActive(renderPass: GPURenderPassEncoder): this {
+  bind(renderPass: GPURenderPassEncoder): this {
     renderPass.setIndexBuffer(this.buffer, this.isInt16 ? 'uint16' : 'uint32')
     return this
   }
 
-  destroy(): void {
-    this.buffer.destroy()
-  }
 }

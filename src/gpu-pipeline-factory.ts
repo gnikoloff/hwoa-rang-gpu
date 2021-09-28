@@ -28,11 +28,12 @@ export const gpuPipelineFactory = (
     uniforms,
     textures,
   })
-  let pipeline = pipelinesMap.get(pipelineDefString)
-  if (!pipeline) {
-    pipeline = device.createRenderPipeline(pipelineDefinition)
-    console.log('pipeline', pipelineDefString)
-    pipelinesMap.set(pipelineDefString, pipeline)
-  }
+  // let pipeline = pipelinesMap.get(pipelineDefString)
+  // if (!pipeline) {
+  let pipeline = device.createRenderPipeline(pipelineDefinition)
+  // console.log('pipeline', pipelineDefString)
+
+  // pipelinesMap.set(pipelineDefString, pipeline)
+  // }
   return pipeline
 }

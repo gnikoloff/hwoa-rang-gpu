@@ -4,25 +4,17 @@
     "target": "ES6",
     "allowJs": true,
     "outDir": "dist",
-    "strict": true,
+    "strict": false,
     // "inlineSourceMap": true,
     "allowSyntheticDefaultImports": true,
-    "strictNullChecks": true,
+    "strictNullChecks": false,
     "lib": ["es2017", "dom", "dom.iterable"],
     "noImplicitAny": false,
     "declaration": true,
     "declarationDir": "./dist/@types",
     "moduleResolution": "node",
-    "typeRoots": [
-      "./npm_modules/@types/",
-      "./node_modules/@webgpu/types"
-    ]
+    "typeRoots": ["./npm_modules/@types/", "./node_modules/@webgpu/types"]
   },
-  "include": [
-    "src/lib/hwoa-rang-gl",
-  ],
-  "exclude": [
-    "src/lib/hwoa-rang-gl/docs",
-    "src/lib/hwoa-rang-gl/dist"
-  ]
+  "include": ["src/lib/hwoa-rang-gl"],
+  "exclude": ["src/lib/hwoa-rang-gl/docs", "src/lib/hwoa-rang-gl/dist"]
 }

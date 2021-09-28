@@ -1,16 +1,5 @@
-import { ATTRIB_NAME_POSITION } from './constants'
-import { Uniform } from './Mesh'
-
-const TRANSFORM_UBO_SNIPPET = `
-  [[block]] struct Transform {
-    projectionMatrix: mat4x4<f32>;
-    viewMatrix: mat4x4<f32>;
-    modelMatrix: mat4x4<f32>;
-    normalMatrix: mat4x4<f32>;
-  };
-
-  [[group(0), binding(0)]] var<uniform> transform: Transform;
-`
+import { VertexBuffer } from '.'
+import { UniformInputs, VaryingsInputs } from './types'
 
 export class Shader {
   private device: GPUDevice
@@ -20,6 +9,18 @@ export class Shader {
 
   static ENTRY_FUNCTION = 'main'
 
+  private static TRANSFORM_UBO_SNIPPET = `
+    [[block]] struct Transform {
+      projectionMatrix: mat4x4<f32>;
+      viewMatrix: mat4x4<f32>;
+      modelMatrix: mat4x4<f32>;
+      normalMatrix: mat4x4<f32>;
+    };
+
+    [[group(0), binding(0)]] var<uniform> transform: Transform;
+  `
+
+  // TODO add all cases in a Map
   static getVertexInputFormat(format: GPUVertexFormat) {
     switch (format) {
       case 'float32':
@@ -47,14 +48,14 @@ export class Shader {
     this.stage = stage
 
     if (stage === GPUShaderStage.VERTEX) {
-      this.source += `${TRANSFORM_UBO_SNIPPET}`
+      this.source += `${Shader.TRANSFORM_UBO_SNIPPET}`
     }
   }
 
-  addUniformInputs(inputDefinitions: [string, Uniform][]): this {
+  addUniformInputs(uniforms: UniformInputs): this {
     this.source += `
       [[block]] struct UniformsInput {
-        ${inputDefinitions.reduce((acc, [key, { type }]) => {
+        ${Object.entries(uniforms).reduce((acc, [key, { type }]) => {
           acc += `${key}: ${type};`
           return acc
         }, '')}
@@ -65,22 +66,44 @@ export class Shader {
     return this
   }
 
-  addVertexInputs(inputDefinitions): this {
-    const varyingDefinitions = inputDefinitions
-      // .filter(([key]) => key !== ATTRIB_NAME_POSITION)
-      .reduce((acc, [key, { bindPointIdx, format }]) => {
-        const inputFormat = Shader.getVertexInputFormat(format)
-        let offsetBindPointIdx = bindPointIdx
+  addVertexInputs(
+    vertexBuffers: VertexBuffer[],
+    customVaryings: VaryingsInputs = {},
+  ): this {
+    let varyingDefinitions: string = vertexBuffers.reduce(
+      (acc, { attributes, bindPointIdx }) => {
+        for (const [key, attrib] of attributes.entries()) {
+          const inputFormat = Shader.getVertexInputFormat(attrib.format)
+          let offsetBindPointIdx = bindPointIdx
+          acc += `[[location(${offsetBindPointIdx})]] ${key}: ${inputFormat};\n`
+        }
+        return acc
+      },
+      '',
+    )
+
+    const totalBindIndices =
+      vertexBuffers[vertexBuffers.length - 1].bindPointIdx
+
+    varyingDefinitions += Object.entries(customVaryings).reduce(
+      (acc, [key, { type }], i) => {
+        const inputFormat = Shader.getVertexInputFormat(type)
+        const offsetBindPointIdx = totalBindIndices + i + 1
         acc += `[[location(${offsetBindPointIdx})]] ${key}: ${inputFormat};\n`
         return acc
-      }, '')
+      },
+      '',
+    )
 
     if (this.stage === GPUShaderStage.VERTEX) {
       this.source += `
         struct Input {
-          ${inputDefinitions.reduce((acc, [key, { bindPointIdx, format }]) => {
-            const inputFormat = Shader.getVertexInputFormat(format)
-            acc += `[[location(${bindPointIdx})]] ${key}: ${inputFormat};\n`
+          ${vertexBuffers.reduce((acc, { attributes, bindPointIdx }) => {
+            for (const [key, attrib] of attributes.entries()) {
+              const inputFormat = Shader.getVertexInputFormat(attrib.format)
+              acc += `[[location(${bindPointIdx})]] ${key}: ${inputFormat};\n`
+            }
+
             return acc
           }, '')}
         };
@@ -90,7 +113,7 @@ export class Shader {
           ${varyingDefinitions}
         };
       `
-    } else {
+    } else if (this.stage === GPUShaderStage.FRAGMENT) {
       this.source += `
         struct Input {
           ${varyingDefinitions}
@@ -100,25 +123,27 @@ export class Shader {
     return this
   }
 
-  addTextureInputs(textureBindPoints: { bindIdx: number; name: string }[]) {
+  addTextureInputs(
+    textureBindPoints: { bindIdx: number; name: string; type: string }[],
+  ) {
     this.source += textureBindPoints.reduce(
-      (acc, { bindIdx, name }) =>
+      (acc, { bindIdx, name, type }) =>
         acc +
         `
-          [[group(0), binding(${bindIdx})]] var ${name}: texture_2d<f32>;
+          [[group(0), binding(${bindIdx})]] var ${name}: ${type};
         `,
       '',
     )
   }
 
   addSamplerInputs(
-    samplerBindPoints: { bindIdx: number; name: string }[],
+    samplerBindPoints: { bindIdx: number; name: string; type: string }[],
   ): this {
     this.source += samplerBindPoints.reduce(
-      (acc, { bindIdx, name }) =>
+      (acc, { bindIdx, name, type }) =>
         acc +
         `
-          [[group(0), binding(${bindIdx})]] var ${name}: sampler;
+          [[group(0), binding(${bindIdx})]] var ${name}: ${type};
           `,
       '',
     )
@@ -136,6 +161,7 @@ export class Shader {
     if (!shaderSnippet) {
       throw new Error('Shader must have a main fn block')
     }
+
     if (this.stage === GPUShaderStage.VERTEX) {
       this.source += `
         [[stage(vertex)]] fn main (input: Input) -> Output {
@@ -144,12 +170,12 @@ export class Shader {
           return output;
         }
       `
-    } else {
+    } else if (this.stage === GPUShaderStage.FRAGMENT) {
       this.source += `
-        [[stage(fragment)]] fn main (input: Input) -> [[location(0)]] vec4<f32> {
-          ${shaderSnippet}
-        }
-      `
+          [[stage(fragment)]] fn main (input: Input) -> [[location(0)]] vec4<f32> {
+            ${shaderSnippet}
+          }
+        `
     }
     return this
   }

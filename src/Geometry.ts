@@ -1,5 +1,5 @@
-import { IndexBuffer } from './IndexBuffer'
-import { VertexBuffer } from './VertexBuffer'
+import { IndexBuffer } from './buffers/IndexBuffer'
+import { VertexBuffer } from './buffers/VertexBuffer'
 
 import {
   ATTRIB_NAME_POSITION,
@@ -10,11 +10,11 @@ import {
 
 export class Geometry {
   private device: GPUDevice
-  primitiveType: GPUPrimitiveTopology = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST
+  private indexBuffer?: IndexBuffer
+  private vertexCount = 0
 
-  indexBuffer?: IndexBuffer
-  attributes = new Map()
-  vertexCount = 0
+  public vertexBuffers: VertexBuffer[] = []
+  public primitiveType: GPUPrimitiveTopology = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST
 
   constructor(device: GPUDevice) {
     this.device = device
@@ -35,59 +35,34 @@ export class Geometry {
     return stripIndexFormat
   }
 
-  addIndex(typedArray): this {
-    this.vertexCount = typedArray.length
-    this.indexBuffer = new IndexBuffer(this.device, typedArray)
+  addIndexBuffer(indexBuffer: IndexBuffer): this {
+    this.vertexCount = indexBuffer.itemsCount
+    this.indexBuffer = indexBuffer
     return this
   }
 
-  addAttribute(
-    key: String,
-    typedArray,
-    arrayStride: GPUSize64 = 4 * Float32Array.BYTES_PER_ELEMENT,
-    format: GPUVertexFormat = 'float32x4',
-  ): this {
-    if (key === ATTRIB_NAME_POSITION && !this.vertexCount) {
-      this.vertexCount = typedArray.length / arrayStride
+  addVertexBuffer(vertexBuffer: VertexBuffer): this {
+    const holdsPosition = vertexBuffer.attributes.get(ATTRIB_NAME_POSITION)
+    if (holdsPosition && !this.vertexCount) {
+      this.vertexCount = vertexBuffer.itemsCount
     }
-    const buffer = new VertexBuffer(
-      this.device,
-      this.attributes.size,
-      typedArray,
-      arrayStride,
-      format,
-    )
-    this.attributes.set(key, buffer)
+    this.vertexBuffers.push(vertexBuffer)
     return this
   }
 
-  getVertexBuffers() {
-    return [...this.attributes.entries()]
-  }
-
-  getVertexBuffersLayout() {
+  getVertexBuffersLayout(): GPUVertexBufferLayout[] {
     const buffers: GPUVertexBufferLayout[] = []
-    for (const attrib of this.attributes.values()) {
-      buffers.push({
-        arrayStride: attrib.arrayStride,
-        attributes: [
-          {
-            offset: 0,
-            shaderLocation: attrib.bindPointIdx,
-            format: attrib.format,
-          },
-        ],
-      })
+    for (const vertexBuffer of this.vertexBuffers.values()) {
+      buffers.push(vertexBuffer.getLayout())
     }
     return buffers
   }
 
-  draw(renderPass: GPURenderPassEncoder) {
-    for (const [key, attrib] of this.attributes.entries()) {
-      attrib.setActive(renderPass)
-    }
+  draw(renderPass: GPURenderPassEncoder): void {
+    this.vertexBuffers.forEach((vertexBuffer) => vertexBuffer.bind(renderPass))
+
     if (this.indexBuffer) {
-      this.indexBuffer.setActive(renderPass)
+      this.indexBuffer.bind(renderPass)
       renderPass.drawIndexed(this.vertexCount)
     } else {
       renderPass.draw(this.vertexCount)
@@ -95,8 +70,7 @@ export class Geometry {
   }
 
   destroy(): void {
-    this.attributes.forEach((buffer) => {
-      buffer.destroy()
-    })
+    this.indexBuffer?.destroy()
+    this.vertexBuffers.forEach((buffer) => buffer.destroy())
   }
 }
