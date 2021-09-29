@@ -3,9 +3,9 @@ import { UniformInputs, VaryingsInputs } from './types'
 
 export class Shader {
   private device: GPUDevice
-  stage: GPUShaderStageFlags
-  module!: GPUShaderModule
-  source: string = ``
+  public stage: GPUShaderStageFlags
+  public module!: GPUShaderModule
+  public source: string = ``
 
   static ENTRY_FUNCTION = 'main'
 
@@ -70,38 +70,38 @@ export class Shader {
     vertexBuffers: VertexBuffer[],
     customVaryings: VaryingsInputs = {},
   ): this {
+    let varyingBindIdx = 0
     let varyingDefinitions: string = vertexBuffers.reduce(
-      (acc, { attributes, bindPointIdx }) => {
+      (acc, { attributes }) => {
         for (const [key, attrib] of attributes.entries()) {
           const inputFormat = Shader.getVertexInputFormat(attrib.format)
-          let offsetBindPointIdx = bindPointIdx
-          acc += `[[location(${offsetBindPointIdx})]] ${key}: ${inputFormat};\n`
+          acc += `[[location(${varyingBindIdx})]] ${key}: ${inputFormat};\n`
+          varyingBindIdx++
         }
         return acc
       },
       '',
     )
 
-    const totalBindIndices =
-      vertexBuffers[vertexBuffers.length - 1].bindPointIdx
-
     varyingDefinitions += Object.entries(customVaryings).reduce(
       (acc, [key, { type }], i) => {
         const inputFormat = Shader.getVertexInputFormat(type)
-        const offsetBindPointIdx = totalBindIndices + i + 1
-        acc += `[[location(${offsetBindPointIdx})]] ${key}: ${inputFormat};\n`
+        acc += `[[location(${varyingBindIdx})]] ${key}: ${inputFormat};\n`
+        varyingBindIdx++
         return acc
       },
       '',
     )
 
     if (this.stage === GPUShaderStage.VERTEX) {
+      let attribBindIdx = 0
       this.source += `
         struct Input {
-          ${vertexBuffers.reduce((acc, { attributes, bindPointIdx }) => {
+          ${vertexBuffers.reduce((acc, { attributes }) => {
             for (const [key, attrib] of attributes.entries()) {
               const inputFormat = Shader.getVertexInputFormat(attrib.format)
-              acc += `[[location(${bindPointIdx})]] ${key}: ${inputFormat};\n`
+              acc += `[[location(${attribBindIdx})]] ${key}: ${inputFormat};\n`
+              attribBindIdx++
             }
 
             return acc

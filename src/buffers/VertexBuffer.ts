@@ -38,7 +38,7 @@ export class VertexBuffer extends Buffer {
     return this.typedArray.length / this.arrayStride
   }
 
-  getLayout(): GPUVertexBufferLayout {
+  getLayout(vertexIdx: number): GPUVertexBufferLayout {
     if (!this.attributes.size) {
       console.error('Vertex buffer has no associated attributes!')
     }
@@ -47,7 +47,7 @@ export class VertexBuffer extends Buffer {
       attributes: Array.from(this.attributes).map(([key, vertexBuffer], i) => ({
         offset: vertexBuffer.offset,
         format: vertexBuffer.format,
-        shaderLocation: this.bindPointIdx,
+        shaderLocation: vertexIdx + i,
       })),
     }
   }

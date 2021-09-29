@@ -158,32 +158,32 @@ export class Mesh extends SceneObject {
       this.uboBindGroup.addTexture(texture)
     })
 
-    this.pipeline = gpuPipelineFactory(
-      device,
-      {
-        layout: this.device.createPipelineLayout({
-          bindGroupLayouts: [this.uboBindGroup.getLayout()],
-        }),
-        vertex: {
-          module: vertexShader.shaderModule,
-          entryPoint: Shader.ENTRY_FUNCTION,
-          buffers: geometry.getVertexBuffersLayout(),
-        },
-        fragment: {
-          module: fragmentShader.shaderModule,
-          entryPoint: Shader.ENTRY_FUNCTION,
-          targets,
-        },
-        primitive: {
-          topology: primitiveType,
-          stripIndexFormat: geometry.stripIndexFormat,
-        },
-        multisample,
-        depthStencil,
+    const pipelineDesc: GPURenderPipelineDescriptor = {
+      layout: this.device.createPipelineLayout({
+        bindGroupLayouts: [this.uboBindGroup.getLayout()],
+      }),
+      vertex: {
+        module: vertexShader.shaderModule,
+        entryPoint: Shader.ENTRY_FUNCTION,
+        buffers: geometry.getVertexBuffersLayout(),
       },
-      uniforms,
-      textures,
-    )
+      fragment: {
+        module: fragmentShader.shaderModule,
+        entryPoint: Shader.ENTRY_FUNCTION,
+        targets,
+      },
+      primitive: {
+        topology: primitiveType,
+        stripIndexFormat: geometry.stripIndexFormat,
+      },
+      multisample,
+    }
+
+    if (depthStencil) {
+      pipelineDesc.depthStencil = depthStencil
+    }
+
+    this.pipeline = gpuPipelineFactory(device, pipelineDesc, uniforms, textures)
 
     this.uboBindGroup.attachToPipeline(this.pipeline)
   }

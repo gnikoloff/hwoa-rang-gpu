@@ -52,8 +52,10 @@ export class Geometry {
 
   getVertexBuffersLayout(): GPUVertexBufferLayout[] {
     const buffers: GPUVertexBufferLayout[] = []
+    let vertexBindIdx = 0
     for (const vertexBuffer of this.vertexBuffers.values()) {
-      buffers.push(vertexBuffer.getLayout())
+      buffers.push(vertexBuffer.getLayout(vertexBindIdx))
+      vertexBindIdx += vertexBuffer.attributes.size
     }
     return buffers
   }
