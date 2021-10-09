@@ -1,6 +1,6 @@
-import { Buffer } from './Buffer'
+import { BaseBuffer } from './BaseBuffer'
 
-export class UniformBuffer extends Buffer {
+export class UniformBuffer extends BaseBuffer {
   public byteLength: number
 
   constructor(
@@ -8,8 +8,7 @@ export class UniformBuffer extends Buffer {
     byteLength: GPUSize64,
     usage = GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
   ) {
-    super()
-    this.device = device
+    super(device)
     this.byteLength = byteLength
 
     this.buffer = device.createBuffer({
@@ -18,7 +17,8 @@ export class UniformBuffer extends Buffer {
     })
   }
 
-  write(byteOffset: GPUSize64, data: SharedArrayBuffer | ArrayBuffer) {
+  write(byteOffset: GPUSize64, data: SharedArrayBuffer | ArrayBuffer): this {
     this.device.queue.writeBuffer(this.buffer, byteOffset, data)
+    return this
   }
 }

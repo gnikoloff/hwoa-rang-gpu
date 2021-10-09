@@ -1,9 +1,10 @@
-import { Geometry, Sampler, Texture } from '.'
+import { Geometry, Sampler, StorageBuffer, Texture } from '.'
 
 export type WGLSL_SAMPLER_TYPE = 'sampler' | 'sampler_comparison'
+// TODO: cover all cases
 export type WGLSL_TEXTURE_TYPE =
-  | 'texture_1d'
-  | 'texture_2d'
+  | 'texture_1d<f32>'
+  | 'texture_2d<f32>'
   | 'texture_2d_array'
   | 'texture_3d'
   | 'texture_cube'
@@ -27,13 +28,18 @@ export type WGLSL_INPUT_TYPE =
   | 'i16'
   | 'u16'
 
-// Optional varyings
-interface Varying {
-  type: GPUVertexFormat
-}
+export type WGLSL_BUFFER_ACCESS_MODE_TYPE =
+  | '<storage>'
+  | '<storage, read>'
+  | '<storage, write>'
+  | '<storage, read_write>'
+  | '<uniform>'
 
-export interface VaryingsInputs {
-  [key: string]: Varying
+// Optional varyings
+export interface ShaderIOVar {
+  format: GPUVertexFormat
+  builtIn?: boolean
+  shaderName?: string
 }
 
 // Uniforms
@@ -54,7 +60,18 @@ export interface UniformsDefinitions {
   [key: string]: UniformDefinition
 }
 
+export interface StorageEntry {
+  /**
+   *
+   */
+  attributes: { [key: string]: WGLSL_INPUT_TYPE }
+  value: Float32Array
+  stride: number
+}
+
 export interface ShaderDefinition {
+  outputs?: { [key: string]: ShaderIOVar }
+  inputs?: { [key: string]: ShaderIOVar }
   head?: string
   main: string
 }
@@ -65,9 +82,9 @@ export interface MeshInput {
   vertexShaderSource: ShaderDefinition
   fragmentShaderSource: ShaderDefinition
   uniforms?: UniformInputs
+  storages?: StorageBuffer[]
   textures?: Texture[]
   samplers?: Sampler[]
-  customVaryings?: VaryingsInputs
   multisample?: GPUMultisampleState
   depthStencil?: GPUDepthStencilState
   targets?: GPUColorTargetState[]

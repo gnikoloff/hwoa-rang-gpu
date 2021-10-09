@@ -36,4 +36,9 @@ export class Sampler {
 
     this.sampler = device.createSampler(samplerOptions)
   }
+
+  destroy(): void {
+    // TODO
+    // webgpu spec has nothing on GPUSampler being destroyed
+  }
 }

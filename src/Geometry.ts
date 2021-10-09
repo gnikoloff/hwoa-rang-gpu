@@ -13,6 +13,7 @@ export class Geometry {
   private indexBuffer?: IndexBuffer
   private vertexCount = 0
 
+  public instanceCount = 1
   public vertexBuffers: VertexBuffer[] = []
   public primitiveType: GPUPrimitiveTopology = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST
 
@@ -65,9 +66,9 @@ export class Geometry {
 
     if (this.indexBuffer) {
       this.indexBuffer.bind(renderPass)
-      renderPass.drawIndexed(this.vertexCount)
+      renderPass.drawIndexed(this.vertexCount, this.instanceCount)
     } else {
-      renderPass.draw(this.vertexCount)
+      renderPass.draw(this.vertexCount, this.instanceCount)
     }
   }
 

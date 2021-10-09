@@ -1,7 +1,7 @@
+import { BaseBuffer } from './BaseBuffer'
 import { BufferAttribute } from './BufferAttribute'
-import { Buffer } from './Buffer'
 
-export class VertexBuffer extends Buffer {
+export class VertexBuffer extends BaseBuffer {
   public bindPointIdx: number
   public typedArray: Float32Array
   public arrayStride: GPUSize64
@@ -17,9 +17,7 @@ export class VertexBuffer extends Buffer {
     usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
     stepMode: GPUVertexStepMode = 'vertex',
   ) {
-    super()
-
-    this.device = device
+    super(device)
     this.bindPointIdx = bindPointIdx
     this.typedArray = typedArray
     this.arrayStride = arrayStride
@@ -34,7 +32,7 @@ export class VertexBuffer extends Buffer {
     this.buffer.unmap()
   }
 
-  get itemsCount() {
+  get itemsCount(): number {
     return this.typedArray.length / this.arrayStride
   }
 
@@ -44,11 +42,14 @@ export class VertexBuffer extends Buffer {
     }
     return {
       arrayStride: this.arrayStride,
-      attributes: Array.from(this.attributes).map(([key, vertexBuffer], i) => ({
-        offset: vertexBuffer.offset,
-        format: vertexBuffer.format,
-        shaderLocation: vertexIdx + i,
-      })),
+      stepMode: this.stepMode,
+      attributes: Array.from(this.attributes).map(([_, vertexBuffer], i) => {
+        return {
+          offset: vertexBuffer.offset,
+          format: vertexBuffer.format,
+          shaderLocation: vertexIdx + i,
+        }
+      }),
     }
   }
 

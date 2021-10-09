@@ -1,4 +1,5 @@
 import { UniformBuffer } from './buffers/UniformBuffer'
+import { StorageBuffer } from './buffers/StorageBuffer'
 import { Sampler } from './Sampler'
 import { Texture } from './Texture'
 
@@ -10,6 +11,7 @@ export class BindGroup {
   public samplers: Sampler[] = []
   public textures: Texture[] = []
   public uniformBlocks: UniformBuffer[] = []
+  public storageBuffers: StorageBuffer[] = []
 
   constructor(device: GPUDevice, bindingIndex = 0) {
     this.device = device
@@ -28,6 +30,11 @@ export class BindGroup {
 
   addTexture(texture: Texture): this {
     this.textures.push(texture)
+    return this
+  }
+
+  addStorage(storageBuffer: StorageBuffer): this {
+    this.storageBuffers.push(storageBuffer)
     return this
   }
 
@@ -89,6 +96,19 @@ export class BindGroup {
       accBindingIndex++
     })
 
+    this.storageBuffers.forEach(() => {
+      entries.push({
+        visibility: GPUShaderStage.FRAGMENT,
+        binding: accBindingIndex,
+        buffer: {
+          type: 'storage',
+        },
+      })
+      accBindingIndex++
+    })
+
+    console.log('layout', { entries })
+
     const bindGroupLayout = this.device.createBindGroupLayout({
       entries,
     })
@@ -129,6 +149,18 @@ export class BindGroup {
       accBindingIndex++
     })
 
+    this.storageBuffers.forEach((storageBuffer, i) => {
+      entries.push({
+        binding: accBindingIndex,
+        resource: {
+          buffer: storageBuffer.get(),
+          offset: 0,
+          size: storageBuffer.byteLength,
+        },
+      })
+      accBindingIndex++
+    })
+
     this.bindGroup = this.device.createBindGroup({
       layout: pipeline.getBindGroupLayout(this.bindingIndex),
       entries,
@@ -138,5 +170,10 @@ export class BindGroup {
 
   destroy(): void {
     this.uniformBlocks.forEach((ubo) => ubo.destroy())
+    this.textures.forEach((texture) => texture.destroy())
+    this.samplers.forEach((sampler) => sampler.destroy())
+    this.storageBuffers.forEach((storageBuffer) => storageBuffer.destroy())
+    // TODO
+    // webgpu spec has nothing on destroying GPUBindGroup
   }
 }

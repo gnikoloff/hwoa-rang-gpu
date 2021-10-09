@@ -14,7 +14,7 @@ export class Texture {
     name: string,
     sampleType: GPUTextureSampleType = 'float',
     viewDimension: GPUTextureViewDimension = '2d',
-    wglslTextureType: WGLSL_TEXTURE_TYPE = 'texture_2d',
+    wglslTextureType: WGLSL_TEXTURE_TYPE = 'texture_2d<f32>',
   ) {
     this.device = device
     this.name = name

@@ -11,11 +11,17 @@ import {
 
 import { Geometry } from './Geometry'
 import { gpuPipelineFactory } from './gpu-pipeline-factory'
-import { Shader } from './Shader'
+import { Shader } from './shader/Shader'
 import { BindGroup } from './BindGroup'
 import { Sampler } from './Sampler'
 import { MeshInput, UniformsDefinitions } from './types'
+import { Texture } from './Texture'
+import { VertexShader } from './shader/VertexShader'
+import { FragmentShader } from './shader/FragmentShader'
 
+/**
+ * @public
+ */
 export class Mesh extends SceneObject {
   private device: GPUDevice
   protected renderable = true
@@ -30,13 +36,12 @@ export class Mesh extends SceneObject {
     {
       geometry,
       uniforms = {},
+      storages = [],
       textures = [],
       samplers = [],
 
       vertexShaderSource,
       fragmentShaderSource,
-
-      customVaryings = {},
 
       multisample = {},
       depthStencil = {
@@ -51,12 +56,14 @@ export class Mesh extends SceneObject {
   ) {
     super()
 
+    geometry.primitiveType = primitiveType
+
     this.device = device
     this.geometry = geometry
     this.uniforms = {}
 
     // Each Mesh comes with predetermined UBO called Transforms
-    // There is a second optional UBO called UniformsDefinitions that holds every other uniform
+    // There is a second optional UBO that holds every user-supplied uniform
     let uniformsInputUBOByteLength = 0
     for (const [key, uniform] of Object.entries(uniforms)) {
       this.uniforms[key] = {
@@ -71,8 +78,7 @@ export class Mesh extends SceneObject {
       uniformsInputUBOByteLength += val * bytesPerElement
     }
 
-    geometry.primitiveType = primitiveType
-
+    // Offset shader binding counter by 1 in case of values for optional UBO
     const numBindOffset = uniformsInputUBOByteLength ? 2 : 1
 
     // Generate vertex & fragment shaders based on
@@ -81,57 +87,85 @@ export class Mesh extends SceneObject {
     // - sampler inputs
     // - texture inputs
     // - custom user string snippets
-    const vertexShader = new Shader(
-      device as GPUDevice,
-      GPUShaderStage.VERTEX as GPUShaderStageFlags,
-    )
-    const fragmentShader = new Shader(
-      device as GPUDevice,
-      GPUShaderStage.FRAGMENT as GPUShaderStageFlags,
-    )
-
+    const vertexShader = new VertexShader(device)
+    const fragmentShader = new FragmentShader(device)
     {
       // Generate vertex shader
       if (uniformsInputUBOByteLength) {
         vertexShader.addUniformInputs(uniforms)
       }
-      vertexShader.addVertexInputs(geometry.vertexBuffers, customVaryings)
-      vertexShader.addHeadSnippet(vertexShaderSource.head)
-      vertexShader.addMainFnSnippet(vertexShaderSource.main)
+
+      vertexShader
+        .addShaderVars(geometry.vertexBuffers, vertexShaderSource.outputs)
+        .addSamplerInputs(
+          samplers.map(({ name, wglslSamplerType }, i) => ({
+            bindIdx: numBindOffset + i,
+            name: name,
+            type: wglslSamplerType,
+          })),
+        )
+        .addTextureInputs(
+          textures.map(({ name, wglslTextureType }, i) => ({
+            bindIdx: numBindOffset + samplers.length + i,
+            name: name,
+            type: `${wglslTextureType}`,
+          })),
+        )
+        .addStorages(
+          storages.map(({ dataStride, structDefinition, name }, i) => ({
+            bindIdx: numBindOffset + samplers.length + textures.length + i,
+            name,
+            attributes: structDefinition,
+            dataStride,
+          })),
+        )
+        .addHeadSnippet(vertexShaderSource.head)
+        .addMainFnSnippet(vertexShaderSource.main)
     }
     {
       // Generate fragment shader
       if (uniformsInputUBOByteLength) {
         fragmentShader.addUniformInputs(uniforms)
       }
-      fragmentShader.addVertexInputs(geometry.vertexBuffers, customVaryings)
-      fragmentShader.addSamplerInputs(
-        samplers.map((sampler: Sampler, i: number) => {
-          const bindIdx = numBindOffset + i
-          return {
-            bindIdx,
-            name: sampler.name,
-            type: sampler.wglslSamplerType,
-          }
-        }),
-      )
-      fragmentShader.addTextureInputs(
-        textures.map(({ name, wglslTextureType }, i: number) => ({
-          bindIdx: numBindOffset + samplers.length + i,
-          name: name,
-          type: `${wglslTextureType}`,
-        })),
-      )
-      fragmentShader.addHeadSnippet(fragmentShaderSource.head)
-      fragmentShader.addMainFnSnippet(fragmentShaderSource.main)
+
+      fragmentShader
+        .addShaderVars(
+          geometry.vertexBuffers,
+          fragmentShaderSource.inputs,
+          fragmentShaderSource.outputs,
+        )
+        .addSamplerInputs(
+          samplers.map(({ name, wglslSamplerType }, i) => ({
+            bindIdx: numBindOffset + i,
+            name: name,
+            type: wglslSamplerType,
+          })),
+        )
+        .addTextureInputs(
+          textures.map(({ name, wglslTextureType }, i) => ({
+            bindIdx: numBindOffset + samplers.length + i,
+            name: name,
+            type: `${wglslTextureType}`,
+          })),
+        )
+        .addStorages(
+          storages.map(({ name, dataStride, structDefinition }, i) => ({
+            dataStride,
+            bindIdx: numBindOffset + samplers.length + textures.length + i,
+            name,
+            attributes: structDefinition,
+          })),
+        )
+        .addHeadSnippet(fragmentShaderSource.head)
+        .addMainFnSnippet(fragmentShaderSource.main)
     }
 
-    console.log(vertexShader.source)
-    console.log(fragmentShader.source)
+    // console.log(vertexShader.source)
+    // console.log(fragmentShader.source)
 
     this.uboBindGroup = new BindGroup(device, 0)
-    // First bind group with dedicated first binding containing required uniforms:
 
+    // First bind group with dedicated first binding containing required uniforms:
     // 1. camera projection matrix
     // 2. camera view matrix
     // 3. model world matrix
@@ -151,12 +185,13 @@ export class Mesh extends SceneObject {
     }
 
     // Supply all samplers and textures to bind group
-    samplers.forEach((sampler: Sampler) => {
-      this.uboBindGroup.addSampler(sampler)
-    })
-    textures.map((texture, i) => {
-      this.uboBindGroup.addTexture(texture)
-    })
+    samplers.forEach((sampler: Sampler) =>
+      this.uboBindGroup.addSampler(sampler),
+    )
+    textures.map((texture: Texture) => this.uboBindGroup.addTexture(texture))
+
+    // Supply storages to bind group
+    storages.forEach((storage) => this.uboBindGroup.addStorage(storage))
 
     const pipelineDesc: GPURenderPipelineDescriptor = {
       layout: this.device.createPipelineLayout({
@@ -183,7 +218,13 @@ export class Mesh extends SceneObject {
       pipelineDesc.depthStencil = depthStencil
     }
 
-    this.pipeline = gpuPipelineFactory(device, pipelineDesc, uniforms, textures)
+    this.pipeline = gpuPipelineFactory(
+      device,
+      pipelineDesc,
+      uniforms,
+      textures,
+      storages,
+    )
 
     this.uboBindGroup.attachToPipeline(this.pipeline)
   }
@@ -226,5 +267,9 @@ export class Mesh extends SceneObject {
     this.uboBindGroup.bind(renderPass)
     renderPass.setPipeline(this.pipeline)
     this.geometry.draw(renderPass)
+  }
+
+  destroy(): void {
+    this.uboBindGroup.destroy()
   }
 }

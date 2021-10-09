@@ -15,6 +15,6 @@
     "moduleResolution": "node",
     "typeRoots": ["./npm_modules/@types/", "./node_modules/@webgpu/types"]
   },
-  "include": ["src/lib/hwoa-rang-gl"],
+  "include": ["src"],
   "exclude": ["src/lib/hwoa-rang-gl/docs", "src/lib/hwoa-rang-gl/dist"]
 }
