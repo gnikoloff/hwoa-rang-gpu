@@ -33,7 +33,7 @@ export class Shader {
     this.device = device
   }
 
-  addUniformInputs(uniforms: UniformInputs): this {
+  addUniformInputs(uniforms: UniformInputs, bindIdx: number = 1): this {
     this.source += `
       [[block]] struct UniformsInput {
         ${Object.entries(uniforms).reduce((acc, [key, { type }]) => {
@@ -42,7 +42,7 @@ export class Shader {
         }, '')}
       };
 
-      [[group(0), binding(1)]] var<uniform> inputUBO: UniformsInput;
+      [[group(0), binding(${bindIdx})]] var<uniform> inputUBO: UniformsInput;
     `
     return this
   }

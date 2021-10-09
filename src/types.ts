@@ -93,3 +93,14 @@ export interface MeshInput {
    */
   primitiveType?: GPUPrimitiveTopology
 }
+
+// GPUCompute
+
+export type WorkgroupSize = [number, number, number]
+
+export interface GPUComputeInput {
+  workgroupSize?: WorkgroupSize
+  uniforms?: UniformInputs
+  storages?: StorageBuffer[]
+  shaderSource: ShaderDefinition
+}

@@ -4,12 +4,16 @@ export { UniformBuffer } from './buffers/UniformBuffer'
 export { StorageBuffer } from './buffers/StorageBuffer'
 export { BufferAttribute } from './buffers/BufferAttribute'
 
+export { VertexShader } from './shader/VertexShader'
+export { FragmentShader } from './shader/FragmentShader'
+export { ComputeShader } from './shader/ComputeShader'
+
 export { BindGroup } from './BindGroup'
 export { Sampler } from './Sampler'
 export { Texture } from './Texture'
-export { Shader } from './shader/Shader'
 export { Geometry } from './Geometry'
 export { Mesh } from './Mesh'
+export { GPUCompute } from './GPUCompute'
 
 export { GridHelper } from './helpers/GridHelper'
 

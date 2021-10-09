@@ -18,7 +18,7 @@ export class BindGroup {
     this.bindingIndex = bindingIndex
   }
 
-  bind(renderPass: GPURenderPassEncoder): this {
+  bind(renderPass: GPURenderPassEncoder | GPUComputePassEncoder): this {
     renderPass.setBindGroup(this.bindingIndex, this.bindGroup)
     return this
   }
@@ -65,7 +65,10 @@ export class BindGroup {
 
     this.uniformBlocks.forEach(() => {
       entries.push({
-        visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
+        visibility:
+          GPUShaderStage.VERTEX |
+          GPUShaderStage.FRAGMENT |
+          GPUShaderStage.COMPUTE,
         binding: accBindingIndex,
         buffer: {
           type: 'uniform',
@@ -98,7 +101,7 @@ export class BindGroup {
 
     this.storageBuffers.forEach(() => {
       entries.push({
-        visibility: GPUShaderStage.FRAGMENT,
+        visibility: GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE,
         binding: accBindingIndex,
         buffer: {
           type: 'storage',
@@ -116,7 +119,7 @@ export class BindGroup {
     return bindGroupLayout
   }
 
-  attachToPipeline(pipeline: GPURenderPipeline): this {
+  attachToPipeline(pipeline: GPURenderPipeline | GPUComputePipeline): this {
     const entries: GPUBindGroupEntry[] = []
 
     let accBindingIndex = 0
