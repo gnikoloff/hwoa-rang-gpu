@@ -8,7 +8,7 @@ const VERTEX_SHADER_SNIPPET = `
 `
 
 const FRAGMENT_SHADER_SNIPPET = `
-  return inputUBO.color;
+  output.Color = inputUBO.color;
 `
 
 export class GridHelper extends Mesh {

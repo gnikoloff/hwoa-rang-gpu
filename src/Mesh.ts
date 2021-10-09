@@ -10,7 +10,6 @@ import {
 } from './constants'
 
 import { Geometry } from './Geometry'
-import { gpuPipelineFactory } from './gpu-pipeline-factory'
 import { Shader } from './shader/Shader'
 import { BindGroup } from './BindGroup'
 import { Sampler } from './Sampler'
@@ -26,7 +25,7 @@ export class Mesh extends SceneObject {
   private device: GPUDevice
   protected renderable = true
 
-  public uniforms: UniformsDefinitions
+  public uniforms: UniformsDefinitions = {}
   public geometry: Geometry
   public pipeline: GPURenderPipeline
   public uboBindGroup: BindGroup
@@ -60,7 +59,6 @@ export class Mesh extends SceneObject {
 
     this.device = device
     this.geometry = geometry
-    this.uniforms = {}
 
     // Each Mesh comes with predetermined UBO called Transforms
     // There is a second optional UBO that holds every user-supplied uniform
@@ -218,13 +216,12 @@ export class Mesh extends SceneObject {
       pipelineDesc.depthStencil = depthStencil
     }
 
-    this.pipeline = gpuPipelineFactory(
-      device,
-      pipelineDesc,
-      uniforms,
-      textures,
-      storages,
-    )
+    // TODO
+    // Its suboptimal to create new render pipelines for each object.
+    // Ideally, objects with similar inputs should reuse pipelines
+    // Must think of a good way to dynamically group objects based on inputs
+    // For now, just create new pipeline for each mesh
+    this.pipeline = device.createRenderPipeline(pipelineDesc)
 
     this.uboBindGroup.attachToPipeline(this.pipeline)
   }
