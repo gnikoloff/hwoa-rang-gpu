@@ -2,7 +2,7 @@
 
 micro webgpu rendering & compute library
 
-![Sketch render](https://github.com/gnikoloff/hwoa-rang-gpu/blob/gh-pages/preview.png?raw=true)
+![Sketch render](https://github.com/gnikoloff/hwoa-rang-gpu/blob/master/preview.png?raw=true)
 
 [![](https://img.shields.io/npm/v/hwoa-rang-gpu)](https://www.npmjs.com/package/hwoa-rang-gpu) [![](https://img.shields.io/npm/l/hwoa-rang-gpu) ](https://www.npmjs.com/package/hwoa-rang-gpu) [![size](https://badgen.net/bundlephobia/minzip/hwoa-rang-gpu)](https://bundlephobia.com/result?p=hwoa-rang-gpu) ![size](https://badgen.net/npm/types/hwoa-rang-gpu)
 
