@@ -8,7 +8,8 @@ micro webgpu rendering & compute library
 
 Built from scratch with only two hard dependencies:
 
-- [hwoa-rang-gl](https://github.com/gnikoloff/hwoa-rang-gl) - my webgl library. I heavily borrowed the API agnostic parts of the library, so I didn't have to write them all over again: - perspective & orthographic camera - orbit controls - geometry generation helpers - scene graph
+- [hwoa-rang-gl](https://github.com/gnikoloff/hwoa-rang-gl) - my webgl library. I heavily borrowed the API agnostic parts of the library, so I didn't have to write them all over again:
+    - perspective & orthographic camera - orbit controls - geometry generation helpers - scene graph
 - [gl-matrix](https://glmatrix.net/) - used for all the math I could not bother to write myself
 
 As WebGPU is still considered experimental, things may break. Please file an issue if you see something wrong.
