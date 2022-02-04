@@ -4,14 +4,14 @@ import { Shader } from './Shader'
 
 export class VertexShader extends Shader {
   protected static TRANSFORM_UBO_SNIPPET = `
-    [[block]] struct Transform {
+    struct Transform {
       projectionMatrix: mat4x4<f32>;
       viewMatrix: mat4x4<f32>;
       modelMatrix: mat4x4<f32>;
       normalMatrix: mat4x4<f32>;
     };
 
-    [[group(0), binding(0)]] var<uniform> transform: Transform;
+    @group(0) @binding(0) var<uniform> transform: Transform;
   `
 
   constructor(device: GPUDevice) {
@@ -33,10 +33,10 @@ export class VertexShader extends Shader {
           console.error('shader vertex variable has no proper wglsl format')
         }
         inputDefinitionSnippet += `
-          [[location(${variableIdx})]] ${key}: ${variableShaderFormat};
+          @location(${variableIdx}) ${key}: ${variableShaderFormat};
         `
         outputDefinitionSnippet += `
-          [[location(${variableIdx})]] ${key}: ${variableShaderFormat};
+          @location(${variableIdx}) ${key}: ${variableShaderFormat};
         `
         variableIdx++
       }
@@ -47,7 +47,7 @@ export class VertexShader extends Shader {
         console.error('shader vertex variable has no proper wglsl format')
       }
       outputDefinitionSnippet += `
-        [[location(${variableIdx})]] ${key}: ${variableShaderFormat};
+        @location(${variableIdx}) ${key}: ${variableShaderFormat};
       `
       variableIdx++
     }
@@ -57,7 +57,7 @@ export class VertexShader extends Shader {
       };
 
       struct Output {
-        [[builtin(position)]] Position: vec4<f32>;
+        @builtin(position) Position: vec4<f32>;
         ${outputDefinitionSnippet}
       };
     `
@@ -66,7 +66,7 @@ export class VertexShader extends Shader {
 
   addMainFnSnippet(shaderSnippet: string): this {
     this.source += `
-      [[stage(vertex)]] fn main (input: Input) -> Output {
+      @stage(vertex) fn main (input: Input) -> Output {
         var output: Output;
         ${shaderSnippet}
         return output;
