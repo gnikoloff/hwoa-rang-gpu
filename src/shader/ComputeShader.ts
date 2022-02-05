@@ -4,7 +4,7 @@ import { Shader } from './Shader'
 export class ComputeShader extends Shader {
   addComputeStageWorkgroupSize(workgroupSize: WorkgroupSize): this {
     this.source += `
-      [[stage(compute), workgroup_size(${workgroupSize.join(',')})]]
+      @stage(compute) @workgroup_size(${workgroupSize.join(',')})
     `
     return this
   }
