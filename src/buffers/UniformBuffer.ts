@@ -16,9 +16,4 @@ export class UniformBuffer extends BaseBuffer {
       usage,
     })
   }
-
-  write(byteOffset: GPUSize64, data: SharedArrayBuffer | ArrayBuffer): this {
-    this.device.queue.writeBuffer(this.buffer, byteOffset, data)
-    return this
-  }
 }

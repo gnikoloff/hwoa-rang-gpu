@@ -10,6 +10,11 @@ export class BaseBuffer {
     return this.buffer
   }
 
+  write(byteOffset: GPUSize64, data: SharedArrayBuffer | ArrayBuffer): this {
+    this.device.queue.writeBuffer(this.buffer, byteOffset, data)
+    return this
+  }
+
   destroy(): void {
     this.buffer.destroy()
   }
