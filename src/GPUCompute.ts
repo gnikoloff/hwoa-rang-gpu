@@ -1,7 +1,12 @@
 import { ComputeShader } from './shader/ComputeShader'
 import { StorageBuffer } from './buffers/StorageBuffer'
-import { BindGroup, GPUComputeInput, UniformsDefinitions } from '.'
-import { UNIFORM_TYPES_MAP } from './constants'
+import {
+  BindGroup,
+  GPUComputeInput,
+  UniformDefinition,
+  UniformsDefinitions,
+} from '.'
+import { UNIFORM_ALIGNMENT_SIZE_MAP } from './constants'
 
 export class GPUCompute {
   private device: GPUDevice
@@ -25,18 +30,44 @@ export class GPUCompute {
     this.workgroupSize = workgroupSize
     this.storages = storages
 
+    // Uniform structs using std140 layout, so each block needs to be 16 bytes aligned
+    // Taken from FUNGI by @sketchpunk
+    // https://github.com/sketchpunk/Fungi/blob/f73e8affa68219dce6d1934f6512fa6144ba5815/fungi/core/Ubo.js#L119
+    let uniformBlockSpace = 16
+    let prevUniform: UniformDefinition | null = null
+
     let uniformsInputUBOByteLength = 0
     for (const [key, uniform] of Object.entries(uniforms)) {
-      this.uniforms[key] = {
-        byteOffset: uniformsInputUBOByteLength,
-        ...uniform,
-      }
-      const uniformInfo = UNIFORM_TYPES_MAP.get(uniform.type)
-      if (!uniformInfo) {
+      const uniformSize = UNIFORM_ALIGNMENT_SIZE_MAP.get(uniform.type)
+      if (!uniformSize) {
         throw new Error('cant find uniform mapping')
       }
-      const [val, bytesPerElement] = uniformInfo
-      uniformsInputUBOByteLength += val * bytesPerElement
+
+      const [alignment, size] = uniformSize
+
+      if (uniformBlockSpace >= alignment) {
+        uniformBlockSpace -= size
+      } else if (
+        uniformBlockSpace > 0 &&
+        prevUniform &&
+        !(uniformBlockSpace === 16 && size === 16)
+      ) {
+        prevUniform.byteSize += uniformBlockSpace
+        uniformsInputUBOByteLength += uniformBlockSpace
+        uniformBlockSpace = 16 - size
+      }
+
+      const uniformDefinition = {
+        byteOffset: uniformsInputUBOByteLength,
+        byteSize: size,
+        ...uniform,
+      }
+
+      uniformsInputUBOByteLength += size
+      prevUniform = uniformDefinition
+      if (uniformsInputUBOByteLength <= 0) {
+        uniformBlockSpace = 16
+      }
     }
 
     this.uboBindGroup = new BindGroup(device, 0).addUBO(

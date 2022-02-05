@@ -5,7 +5,7 @@ import {
 } from './lib/hwoa-rang-gl/src'
 
 import {
-  UNIFORM_TYPES_MAP,
+  UNIFORM_ALIGNMENT_SIZE_MAP,
   PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
 } from './constants'
 
@@ -13,7 +13,7 @@ import { Geometry } from './Geometry'
 import { Shader } from './shader/Shader'
 import { BindGroup } from './BindGroup'
 import { Sampler } from './Sampler'
-import { MeshInput, UniformsDefinitions } from './types'
+import { MeshInput, UniformsDefinitions, UniformDefinition } from './types'
 import { Texture } from './Texture'
 import { VertexShader } from './shader/VertexShader'
 import { FragmentShader } from './shader/FragmentShader'
@@ -62,18 +62,45 @@ export class Mesh extends SceneObject {
 
     // Each Mesh comes with predetermined UBO called Transforms
     // There is a second optional UBO that holds every user-supplied uniform
+
+    // Uniform structs using std140 layout, so each block needs to be 16 bytes aligned
+    // Taken from FUNGI by @sketchpunk
+    // https://github.com/sketchpunk/Fungi/blob/f73e8affa68219dce6d1934f6512fa6144ba5815/fungi/core/Ubo.js#L119
+    let uniformBlockSpace = 16
+    let prevUniform: UniformDefinition | null = null
+
     let uniformsInputUBOByteLength = 0
     for (const [key, uniform] of Object.entries(uniforms)) {
-      this.uniforms[key] = {
-        byteOffset: uniformsInputUBOByteLength,
-        ...uniform,
-      }
-      const uniformInfo = UNIFORM_TYPES_MAP.get(uniform.type)
-      if (!uniformInfo) {
+      const uniformSize = UNIFORM_ALIGNMENT_SIZE_MAP.get(uniform.type)
+      if (!uniformSize) {
         throw new Error('cant find uniform mapping')
       }
-      const [val, bytesPerElement] = uniformInfo
-      uniformsInputUBOByteLength += val * bytesPerElement
+
+      const [alignment, size] = uniformSize
+
+      if (uniformBlockSpace >= alignment) {
+        uniformBlockSpace -= size
+      } else if (
+        uniformBlockSpace > 0 &&
+        prevUniform &&
+        !(uniformBlockSpace === 16 && size === 16)
+      ) {
+        prevUniform.byteSize += uniformBlockSpace
+        uniformsInputUBOByteLength += uniformBlockSpace
+        uniformBlockSpace = 16 - size
+      }
+
+      const uniformDefinition = {
+        byteOffset: uniformsInputUBOByteLength,
+        byteSize: size,
+        ...uniform,
+      }
+
+      uniformsInputUBOByteLength += size
+      prevUniform = uniformDefinition
+      if (uniformsInputUBOByteLength <= 0) {
+        uniformBlockSpace = 16
+      }
     }
 
     // Offset shader binding counter by 1 in case of values for optional UBO
@@ -241,6 +268,7 @@ export class Mesh extends SceneObject {
   ): void {
     this.updateWorldMatrix(this.parentNode?.worldMatrix)
 
+    // Update base UBO that holds global transforms
     this.uboBindGroup
       .writeToUBO(
         0,
@@ -252,8 +280,6 @@ export class Mesh extends SceneObject {
         16 * 3 * Float32Array.BYTES_PER_ELEMENT,
         this.normalMatrix as ArrayBuffer,
       )
-
-    this.uboBindGroup
       .writeToUBO(0, 0, camera.projectionMatrix as ArrayBuffer)
       .writeToUBO(
         0,
