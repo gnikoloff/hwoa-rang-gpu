@@ -1,5 +1,20 @@
 import { WGLSL_INPUT_TYPE, UniformInputs } from '../interfaces'
 
+const VERTEX_WGLSL_TYPES = new Map([
+  ['float32', 'f32'],
+  ['float32x2', 'vec2<f32>'],
+  ['float32x3', 'vec3<f32>'],
+  ['float32x4', 'vec4<f32>'],
+  ['sint32', 'i32'],
+  ['sint32x2', 'vec2<i32>'],
+  ['sint32x3', 'vec3<i32>'],
+  ['sint32x4', 'vec4<f32>'],
+  ['uint32', 'u32'],
+  ['uint32x2', 'vec2<u32>'],
+  ['uint32x3', 'vec3<u32>'],
+  ['uint32x4', 'vec4<u32>'],
+])
+
 export default class Shader {
   protected device: GPUDevice
   public module!: GPUShaderModule
@@ -8,16 +23,11 @@ export default class Shader {
   static ENTRY_FUNCTION = 'main'
 
   static getVertexInputFormat(format: GPUVertexFormat) {
-    switch (format) {
-      case 'float32':
-        return 'f32'
-      case 'float32x2':
-        return 'vec2<f32>'
-      case 'float32x3':
-        return 'vec4<f32>'
-      case 'float32x4':
-        return 'vec4<f32>'
+    let wglslFormat = VERTEX_WGLSL_TYPES.get(format)
+    if (!wglslFormat) {
+      throw new Error(`Can't get input WGLSL type for vertex input`)
     }
+    return wglslFormat
   }
 
   get shaderModule(): GPUShaderModule {
