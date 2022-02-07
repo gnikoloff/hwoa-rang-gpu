@@ -17,6 +17,7 @@ import { MeshInput, UniformsDefinitions, UniformDefinition } from './types'
 import { Texture } from './Texture'
 import { VertexShader } from './shader/VertexShader'
 import { FragmentShader } from './shader/FragmentShader'
+import PipelineCache from './PipelineCache'
 
 /**
  * @public
@@ -243,12 +244,9 @@ export class Mesh extends SceneObject {
       pipelineDesc.depthStencil = depthStencil
     }
 
-    // TODO
-    // Its suboptimal to create new render pipelines for each object.
-    // Ideally, objects with similar inputs should reuse pipelines
-    // Must think of a good way to dynamically group objects based on inputs
-    // For now, just create new pipeline for each mesh
-    this.pipeline = device.createRenderPipeline(pipelineDesc)
+    // Reuse pipelines from a pool
+    PipelineCache.device = device
+    this.pipeline = PipelineCache.instance.getRenderPipeline(pipelineDesc)
 
     this.uboBindGroup.attachToPipeline(this.pipeline)
   }

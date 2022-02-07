@@ -43,13 +43,14 @@ export interface ShaderIOVar {
 }
 
 // Uniforms
-interface Uniform {
+export interface Uniform {
   type: WGLSL_INPUT_TYPE
   value: ArrayBuffer | SharedArrayBuffer
 }
 
 export interface UniformDefinition extends Uniform {
   byteOffset: GPUSize64
+  byteSize: GPUSize64
 }
 
 export interface UniformInputs {
