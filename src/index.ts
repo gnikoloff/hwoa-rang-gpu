@@ -1,21 +1,38 @@
-export { IndexBuffer } from './buffers/IndexBuffer'
-export { VertexBuffer } from './buffers/VertexBuffer'
-export { UniformBuffer } from './buffers/UniformBuffer'
-export { StorageBuffer } from './buffers/StorageBuffer'
-export { BufferAttribute } from './buffers/BufferAttribute'
+import IndexBuffer from './buffers/IndexBuffer'
+import VertexBuffer from './buffers/VertexBuffer'
+import UniformBuffer from './buffers/UniformBuffer'
+import StorageBuffer from './buffers/StorageBuffer'
+import BufferAttribute from './buffers/BufferAttribute'
 
-export { VertexShader } from './shader/VertexShader'
-export { FragmentShader } from './shader/FragmentShader'
-export { ComputeShader } from './shader/ComputeShader'
+import VertexShader from './shader/VertexShader'
+import FragmentShader from './shader/FragmentShader'
+import ComputeShader from './shader/ComputeShader'
 
-export { BindGroup } from './BindGroup'
-export { Sampler } from './Sampler'
-export { Texture } from './Texture'
-export { Geometry } from './Geometry'
-export { Mesh } from './Mesh'
+import BindGroup from './BindGroup'
+import Sampler from './Sampler'
+import Texture from './Texture'
+import Geometry from './Geometry'
+import Mesh from './Mesh'
 export { GPUCompute } from './GPUCompute'
 
-export { GridHelper } from './helpers/GridHelper'
+import GridHelper from './extras/GridHelper'
+
+export {
+  IndexBuffer,
+  VertexBuffer,
+  UniformBuffer,
+  StorageBuffer,
+  BufferAttribute,
+  VertexShader,
+  FragmentShader,
+  ComputeShader,
+  BindGroup,
+  Sampler,
+  Texture,
+  Geometry,
+  Mesh,
+  GridHelper,
+}
 
 export {
   Transform,

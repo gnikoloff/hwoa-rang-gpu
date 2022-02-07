@@ -1,6 +1,6 @@
-import { BaseBuffer } from './BaseBuffer'
+import BaseBuffer from './BaseBuffer'
 
-export class UniformBuffer extends BaseBuffer {
+export default class UniformBuffer extends BaseBuffer {
   public byteLength: number
 
   constructor(

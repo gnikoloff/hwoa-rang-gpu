@@ -1,11 +1,11 @@
-import { ComputeShader } from './shader/ComputeShader'
-import { StorageBuffer } from './buffers/StorageBuffer'
+import ComputeShader from './shader/ComputeShader'
+import StorageBuffer from './buffers/StorageBuffer'
+import BindGroup from './BindGroup'
 import {
-  BindGroup,
   GPUComputeInput,
   UniformDefinition,
   UniformsDefinitions,
-} from '.'
+} from './types'
 import { UNIFORM_ALIGNMENT_SIZE_MAP } from './constants'
 
 export class GPUCompute {

@@ -9,20 +9,21 @@ import {
   PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
 } from './constants'
 
-import { Geometry } from './Geometry'
-import { Shader } from './shader/Shader'
-import { BindGroup } from './BindGroup'
-import { Sampler } from './Sampler'
-import { MeshInput, UniformsDefinitions, UniformDefinition } from './types'
-import { Texture } from './Texture'
-import { VertexShader } from './shader/VertexShader'
-import { FragmentShader } from './shader/FragmentShader'
+import Geometry from './Geometry'
+import Shader from './shader/Shader'
+import BindGroup from './BindGroup'
+import Sampler from './Sampler'
+import Texture from './Texture'
+import VertexShader from './shader/VertexShader'
+import FragmentShader from './shader/FragmentShader'
 import PipelineCache from './PipelineCache'
+
+import { MeshInput, UniformsDefinitions, UniformDefinition } from './types'
 
 /**
  * @public
  */
-export class Mesh extends SceneObject {
+export default class Mesh extends SceneObject {
   private device: GPUDevice
   protected renderable = true
 

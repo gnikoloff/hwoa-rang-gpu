@@ -1,9 +1,9 @@
-import { UniformBuffer } from './buffers/UniformBuffer'
-import { StorageBuffer } from './buffers/StorageBuffer'
-import { Sampler } from './Sampler'
-import { Texture } from './Texture'
+import UniformBuffer from './buffers/UniformBuffer'
+import StorageBuffer from './buffers/StorageBuffer'
+import Sampler from './Sampler'
+import Texture from './Texture'
 
-export class BindGroup {
+export default class BindGroup {
   private device: GPUDevice
   private bindGroup!: GPUBindGroup
 
@@ -110,13 +110,9 @@ export class BindGroup {
       accBindingIndex++
     })
 
-    console.log('layout', { entries })
-
-    const bindGroupLayout = this.device.createBindGroupLayout({
+    return this.device.createBindGroupLayout({
       entries,
     })
-
-    return bindGroupLayout
   }
 
   attachToPipeline(pipeline: GPURenderPipeline | GPUComputePipeline): this {

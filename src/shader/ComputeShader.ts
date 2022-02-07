@@ -1,7 +1,7 @@
 import { WorkgroupSize } from '../types'
-import { Shader } from './Shader'
+import Shader from './Shader'
 
-export class ComputeShader extends Shader {
+export default class ComputeShader extends Shader {
   addComputeStageWorkgroupSize(workgroupSize: WorkgroupSize): this {
     this.source += `
       @stage(compute) @workgroup_size(${workgroupSize.join(',')})

@@ -1,4 +1,4 @@
-export class BaseBuffer {
+export default class BaseBuffer {
   protected device: GPUDevice
   protected buffer: GPUBuffer
 

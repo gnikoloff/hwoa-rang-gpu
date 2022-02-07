@@ -1,6 +1,6 @@
 import { WGLSL_SAMPLER_TYPE } from './types'
 
-export class Sampler {
+export default class Sampler {
   private device: GPUDevice
   private sampler: GPUSampler
 

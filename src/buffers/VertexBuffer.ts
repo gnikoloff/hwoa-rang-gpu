@@ -1,9 +1,10 @@
-import { BaseBuffer } from './BaseBuffer'
-import { BufferAttribute } from './BufferAttribute'
+import { ATTRIB_NAME_POSITION } from '../constants'
+import BaseBuffer from './BaseBuffer'
+import BufferAttribute from './BufferAttribute'
 
-export class VertexBuffer extends BaseBuffer {
+export default class VertexBuffer extends BaseBuffer {
   public bindPointIdx: number
-  public typedArray: Float32Array
+  public typedArray?: Float32Array
   public arrayStride: GPUSize64
   public attributes: Map<string, BufferAttribute> = new Map()
 
@@ -12,28 +13,33 @@ export class VertexBuffer extends BaseBuffer {
   constructor(
     device: GPUDevice,
     bindPointIdx: number,
-    typedArray: Float32Array,
+    typedArray?: Float32Array,
     arrayStride: GPUSize64 = 4 * Float32Array.BYTES_PER_ELEMENT,
     usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
     stepMode: GPUVertexStepMode = 'vertex',
   ) {
     super(device)
     this.bindPointIdx = bindPointIdx
-    this.typedArray = typedArray
     this.arrayStride = arrayStride
     this.stepMode = stepMode
 
-    this.buffer = device.createBuffer({
-      size: typedArray.byteLength,
-      usage,
-      mappedAtCreation: true,
-    })
-    new Float32Array(this.buffer.getMappedRange()).set(typedArray)
-    this.buffer.unmap()
+    if (typedArray) {
+      this.typedArray = typedArray
+      this.buffer = device.createBuffer({
+        size: typedArray.byteLength,
+        usage,
+        mappedAtCreation: true,
+      })
+      new Float32Array(this.buffer.getMappedRange()).set(typedArray)
+      this.buffer.unmap()
+    }
   }
 
   get itemsCount(): number {
-    return this.typedArray.length / this.arrayStride
+    // TODO - hacky
+    const posStride = this.attributes.get(ATTRIB_NAME_POSITION).size
+    const itemsPerVertex = posStride / Float32Array.BYTES_PER_ELEMENT
+    return this.typedArray.length / itemsPerVertex
   }
 
   getLayout(vertexIdx: number): GPUVertexBufferLayout {
@@ -56,7 +62,7 @@ export class VertexBuffer extends BaseBuffer {
   addAttribute(
     key: string,
     offset: GPUSize64 = 0,
-    size: GPUSize64 = 3,
+    size: GPUSize64 = 3 * Float32Array.BYTES_PER_ELEMENT,
     format: GPUVertexFormat = 'float32x4',
   ): this {
     const attribute = new BufferAttribute(offset, size, format)

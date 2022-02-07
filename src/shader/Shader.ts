@@ -1,6 +1,6 @@
 import { WGLSL_INPUT_TYPE, UniformInputs } from '../types'
 
-export class Shader {
+export default class Shader {
   protected device: GPUDevice
   public module!: GPUShaderModule
   public source: string = ``
@@ -35,14 +35,14 @@ export class Shader {
 
   addUniformInputs(uniforms: UniformInputs, bindIdx: number = 1): this {
     this.source += `
-      [[block]] struct UniformsInput {
+      struct UniformsInput {
         ${Object.entries(uniforms).reduce((acc, [key, { type }]) => {
           acc += `${key}: ${type};`
           return acc
         }, '')}
       };
 
-      [[group(0), binding(${bindIdx})]] var<uniform> inputUBO: UniformsInput;
+      @group(0) @binding(${bindIdx}) var<uniform> inputUBO: UniformsInput;
     `
     return this
   }
@@ -54,7 +54,7 @@ export class Shader {
       (acc, { bindIdx, name, type }) =>
         acc +
         `
-          [[group(0), binding(${bindIdx})]] var ${name}: ${type};
+          @group(0) @binding(${bindIdx}) var ${name}: ${type};
         `,
       '',
     )
@@ -68,7 +68,7 @@ export class Shader {
       (acc, { bindIdx, name, type }) =>
         acc +
         `
-          [[group(0), binding(${bindIdx})]] var ${name}: ${type};
+          @group(0) @binding(${bindIdx}) var ${name}: ${type};
           `,
       '',
     )
@@ -91,11 +91,11 @@ export class Shader {
             .join('\n')}
         };
 
-        [[block]] struct ${name}Collection {
-          ${name.toLowerCase()}s: [[stride(48)]] array<Light>;
+        struct ${name}Collection {
+          ${name.toLowerCase()}s: @stride(48) array<Light>;
         };
 
-        [[group(0), binding(${bindIdx})]] var<storage, read_write> ${name.toLowerCase()}Collection: ${name}Collection;
+        @group(0) @binding(${bindIdx}) var<storage, read_write> ${name.toLowerCase()}Collection: ${name}Collection;
       `
     })
     return this

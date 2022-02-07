@@ -1,4 +1,4 @@
-export class BufferAttribute {
+export default class BufferAttribute {
   public offset: GPUSize64 = 0
   public size: GPUSize64 = 3
   public format: GPUVertexFormat = 'float32x4'

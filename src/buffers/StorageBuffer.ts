@@ -1,7 +1,7 @@
 import { WGLSL_BUFFER_ACCESS_MODE_TYPE, WGLSL_INPUT_TYPE } from '../types'
-import { BaseBuffer } from './BaseBuffer'
+import BaseBuffer from './BaseBuffer'
 
-export class StorageBuffer extends BaseBuffer {
+export default class StorageBuffer extends BaseBuffer {
   public byteLength: number
   public dataStride: number
   public usage: GPUBufferUsageFlags

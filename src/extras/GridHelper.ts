@@ -11,14 +11,14 @@ const FRAGMENT_SHADER_SNIPPET = `
   output.Color = inputUBO.color;
 `
 
-export class GridHelper extends Mesh {
+export default class GridHelper extends Mesh {
   constructor(
     device: GPUDevice,
     radius: number,
     divisionsCount: number,
     color = [0.5, 0.5, 0.5, 1],
   ) {
-    const geometry = new Geometry(device)
+    const geometry = new Geometry()
     const scaleX = radius / divisionsCount
     const scaleY = radius / divisionsCount
     const vertexCount = divisionsCount * divisionsCount * 2

@@ -1,8 +1,8 @@
 import { VertexBuffer } from '..'
 import { ShaderIOVar } from '../types'
-import { Shader } from './Shader'
+import Shader from './Shader'
 
-export class VertexShader extends Shader {
+export default class VertexShader extends Shader {
   protected static TRANSFORM_UBO_SNIPPET = `
     struct Transform {
       projectionMatrix: mat4x4<f32>;

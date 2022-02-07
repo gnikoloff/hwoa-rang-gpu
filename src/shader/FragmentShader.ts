@@ -1,8 +1,8 @@
 import { VertexBuffer } from '..'
 import { ShaderIOVar } from '../types'
-import { Shader } from './Shader'
+import Shader from './Shader'
 
-export class FragmentShader extends Shader {
+export default class FragmentShader extends Shader {
   addShaderVars(
     vertexBuffers: VertexBuffer[],
     customShaderVarsInputs: { [key: string]: ShaderIOVar } = {},

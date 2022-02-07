@@ -1,6 +1,6 @@
-import { BaseBuffer } from './BaseBuffer'
+import BaseBuffer from './BaseBuffer'
 
-export class IndexBuffer extends BaseBuffer {
+export default class IndexBuffer extends BaseBuffer {
   public itemsCount: number
   public typedArray: Uint16Array | Uint32Array
 

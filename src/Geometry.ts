@@ -1,5 +1,5 @@
-import { IndexBuffer } from './buffers/IndexBuffer'
-import { VertexBuffer } from './buffers/VertexBuffer'
+import IndexBuffer from './buffers/IndexBuffer'
+import VertexBuffer from './buffers/VertexBuffer'
 
 import {
   ATTRIB_NAME_POSITION,
@@ -8,18 +8,13 @@ import {
   PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP,
 } from './constants'
 
-export class Geometry {
-  private device: GPUDevice
+export default class Geometry {
   private indexBuffer?: IndexBuffer
   private vertexCount = 0
 
   public instanceCount = 1
   public vertexBuffers: VertexBuffer[] = []
   public primitiveType: GPUPrimitiveTopology = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST
-
-  constructor(device: GPUDevice) {
-    this.device = device
-  }
 
   get hasIndex(): boolean {
     return !!this.indexBuffer
