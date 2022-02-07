@@ -4,10 +4,7 @@ import {
   PerspectiveCamera,
 } from './lib/hwoa-rang-gl/src'
 
-import {
-  UNIFORM_ALIGNMENT_SIZE_MAP,
-  PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
-} from './constants'
+import { PRIMITIVE_TOPOLOGY_TRIANGLE_LIST } from './constants'
 
 import Geometry from './Geometry'
 import Shader from './shader/Shader'
@@ -19,6 +16,7 @@ import FragmentShader from './shader/FragmentShader'
 import PipelineCache from './PipelineCache'
 
 import { MeshInput, UniformsDefinitions, UniformDefinition } from './types'
+import { alignUniformsToStd140Layout } from './helpers'
 
 /**
  * @public
@@ -64,49 +62,11 @@ export default class Mesh extends SceneObject {
 
     // Each Mesh comes with predetermined UBO called Transforms
     // There is a second optional UBO that holds every user-supplied uniform
-
-    // Uniform structs using std140 layout, so each block needs to be 16 bytes aligned
-    // Taken from FUNGI by @sketchpunk
-    // https://github.com/sketchpunk/Fungi/blob/f73e8affa68219dce6d1934f6512fa6144ba5815/fungi/core/Ubo.js#L119
-    let uniformBlockSpace = 16
-    let prevUniform: UniformDefinition | null = null
-
-    let uniformsInputUBOByteLength = 0
-    for (const [key, uniform] of Object.entries(uniforms)) {
-      const uniformSize = UNIFORM_ALIGNMENT_SIZE_MAP.get(uniform.type)
-      if (!uniformSize) {
-        throw new Error('cant find uniform mapping')
-      }
-
-      const [alignment, size] = uniformSize
-
-      if (uniformBlockSpace >= alignment) {
-        uniformBlockSpace -= size
-      } else if (
-        uniformBlockSpace > 0 &&
-        prevUniform &&
-        !(uniformBlockSpace === 16 && size === 16)
-      ) {
-        prevUniform.byteSize += uniformBlockSpace
-        uniformsInputUBOByteLength += uniformBlockSpace
-        uniformBlockSpace = 16 - size
-      }
-
-      const uniformDefinition = {
-        byteOffset: uniformsInputUBOByteLength,
-        byteSize: size,
-        ...uniform,
-      }
-
-      uniformsInputUBOByteLength += size
-      prevUniform = uniformDefinition
-      if (uniformsInputUBOByteLength <= 0) {
-        uniformBlockSpace = 16
-      }
-    }
+    const [optionalUBOByteLength, uniformsStd140Aligned] =
+      alignUniformsToStd140Layout(uniforms)
 
     // Offset shader binding counter by 1 in case of values for optional UBO
-    const numBindOffset = uniformsInputUBOByteLength ? 2 : 1
+    const numBindOffset = optionalUBOByteLength ? 2 : 1
 
     // Generate vertex & fragment shaders based on
     // - vertex inputs
@@ -118,7 +78,7 @@ export default class Mesh extends SceneObject {
     const fragmentShader = new FragmentShader(device)
     {
       // Generate vertex shader
-      if (uniformsInputUBOByteLength) {
+      if (optionalUBOByteLength) {
         vertexShader.addUniformInputs(uniforms)
       }
 
@@ -151,7 +111,7 @@ export default class Mesh extends SceneObject {
     }
     {
       // Generate fragment shader
-      if (uniformsInputUBOByteLength) {
+      if (optionalUBOByteLength) {
         fragmentShader.addUniformInputs(uniforms)
       }
 
@@ -203,8 +163,8 @@ export default class Mesh extends SceneObject {
     )
 
     // Bind sectond optional UBO only if extra uniforms are passed
-    if (uniformsInputUBOByteLength) {
-      this.uboBindGroup.addUBO(uniformsInputUBOByteLength)
+    if (optionalUBOByteLength) {
+      this.uboBindGroup.addUBO(optionalUBOByteLength)
     }
     // Pass optional initial uniform values to second binding on GPU
     for (const { value, byteOffset } of Object.values(this.uniforms)) {
