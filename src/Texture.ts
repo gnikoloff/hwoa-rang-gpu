@@ -1,4 +1,4 @@
-import { WGLSL_TEXTURE_TYPE } from './types'
+import { WGLSL_TEXTURE_TYPE } from './interfaces'
 
 export default class Texture {
   private device: GPUDevice

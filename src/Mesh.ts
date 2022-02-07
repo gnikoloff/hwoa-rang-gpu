@@ -15,7 +15,7 @@ import VertexShader from './shader/VertexShader'
 import FragmentShader from './shader/FragmentShader'
 import PipelineCache from './PipelineCache'
 
-import { MeshInput, UniformsDefinitions, UniformDefinition } from './types'
+import { MeshInput, UniformsDefinitions } from './interfaces'
 import { alignUniformsToStd140Layout } from './helpers'
 
 /**

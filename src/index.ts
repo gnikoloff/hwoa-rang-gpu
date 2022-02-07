@@ -43,4 +43,4 @@ export {
   CameraController,
 } from './lib/hwoa-rang-gl/src'
 
-export * from './types'
+export * from './interfaces'

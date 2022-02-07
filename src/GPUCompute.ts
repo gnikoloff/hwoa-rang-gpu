@@ -5,7 +5,7 @@ import {
   GPUComputeInput,
   UniformDefinition,
   UniformsDefinitions,
-} from './types'
+} from './interfaces'
 import { UNIFORM_ALIGNMENT_SIZE_MAP } from './constants'
 
 export class GPUCompute {

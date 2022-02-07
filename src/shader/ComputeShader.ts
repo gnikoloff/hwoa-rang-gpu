@@ -1,4 +1,4 @@
-import { WorkgroupSize } from '../types'
+import { WorkgroupSize } from '../interfaces'
 import Shader from './Shader'
 
 export default class ComputeShader extends Shader {

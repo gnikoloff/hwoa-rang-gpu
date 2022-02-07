@@ -1,4 +1,4 @@
-import { WGLSL_INPUT_TYPE, UniformInputs } from '../types'
+import { WGLSL_INPUT_TYPE, UniformInputs } from '../interfaces'
 
 export default class Shader {
   protected device: GPUDevice

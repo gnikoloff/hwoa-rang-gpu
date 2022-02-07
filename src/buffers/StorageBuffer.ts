@@ -1,4 +1,4 @@
-import { WGLSL_BUFFER_ACCESS_MODE_TYPE, WGLSL_INPUT_TYPE } from '../types'
+import { WGLSL_BUFFER_ACCESS_MODE_TYPE, WGLSL_INPUT_TYPE } from '../interfaces'
 import BaseBuffer from './BaseBuffer'
 
 export default class StorageBuffer extends BaseBuffer {
