@@ -1,5 +1,14 @@
 import { Geometry, Sampler, StorageBuffer, Texture } from '.'
 
+export type TYPED_ARRAY =
+  | Float32Array
+  | Uint32Array
+  | Int32Array
+  | Uint16Array
+  | Int16Array
+  | Uint8Array
+  | Int8Array
+
 export type WGLSL_SAMPLER_TYPE = 'sampler' | 'sampler_comparison'
 // TODO: cover all cases
 export type WGLSL_TEXTURE_TYPE =
@@ -19,12 +28,18 @@ export type WGLSL_TEXTURE_TYPE =
 export type WGLSL_INPUT_TYPE =
   | 'mat4x4<f32>'
   | 'mat3x3<f32>'
+  | 'f32'
   | 'vec4<f32>'
   | 'vec3<f32>'
   | 'vec2<f32>'
-  | 'f32'
   | 'i32'
+  | 'vec4<i32>'
+  | 'vec3<i32>'
+  | 'vec2<i32>'
   | 'u32'
+  | 'vec4<u32>'
+  | 'vec3<u32>'
+  | 'vec2<u32>'
   | 'i16'
   | 'u16'
 
@@ -45,16 +60,12 @@ export interface ShaderIOVar {
 // Uniforms
 export interface Uniform {
   type: WGLSL_INPUT_TYPE
-  value: ArrayBuffer | SharedArrayBuffer
+  value?: ArrayBuffer | SharedArrayBuffer
 }
 
 export interface UniformDefinition extends Uniform {
   byteOffset: GPUSize64
   byteSize: GPUSize64
-}
-
-export interface UniformInputs {
-  [key: string]: Uniform
 }
 
 export interface UniformsDefinitions {
@@ -82,7 +93,9 @@ export interface MeshInput {
   geometry: Geometry
   vertexShaderSource: ShaderDefinition
   fragmentShaderSource: ShaderDefinition
-  uniforms?: UniformInputs
+  uniforms?: {
+    [key: string]: Uniform
+  }
   storages?: StorageBuffer[]
   textures?: Texture[]
   samplers?: Sampler[]
@@ -95,13 +108,38 @@ export interface MeshInput {
   primitiveType?: GPUPrimitiveTopology
 }
 
+// Buffers
+export interface BufferInput {
+  typedArray?: TYPED_ARRAY
+  byteLength?: number
+  usage?: GPUBufferUsageFlags
+  mappedAtCreation?: boolean
+  label?: string
+}
+
+export interface UniformBufferInput extends BufferInput {}
+
+export interface IndexBufferInput extends BufferInput {}
+
+export interface VertexBufferInput extends BufferInput {
+  bindPointIdx: number
+  stride?: number
+  stepMode?: GPUVertexStepMode
+}
+
+export interface StorageBufferInput extends BufferInput {
+  stride?: number
+}
+
 // GPUCompute
 
 export type WorkgroupSize = [number, number, number]
 
 export interface GPUComputeInput {
   workgroupSize?: WorkgroupSize
-  uniforms?: UniformInputs
+  uniforms?: {
+    [key: string]: Uniform
+  }
   storages?: StorageBuffer[]
   shaderSource: ShaderDefinition
 }

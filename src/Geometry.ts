@@ -56,8 +56,17 @@ export default class Geometry {
     return buffers
   }
 
-  draw(renderPass: GPURenderPassEncoder): void {
+  draw(renderPass: GPURenderPassEncoder, indirectBuffer: GPUBuffer): void {
     this.vertexBuffers.forEach((vertexBuffer) => vertexBuffer.bind(renderPass))
+
+    if (indirectBuffer) {
+      if (this.indexBuffer) {
+        this.indexBuffer.bind(renderPass)
+        renderPass.drawIndexedIndirect(indirectBuffer, 0)
+      } else {
+        renderPass.drawIndirect(indirectBuffer, 0)
+      }
+    }
 
     if (this.indexBuffer) {
       this.indexBuffer.bind(renderPass)

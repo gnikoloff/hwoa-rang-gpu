@@ -39,7 +39,9 @@ export default class BindGroup {
   }
 
   addUBO(byteLength): this {
-    const uniformBlock = new UniformBuffer(this.device, byteLength)
+    const uniformBlock = new UniformBuffer(this.device, {
+      byteLength,
+    })
     this.uniformBlocks.push(uniformBlock)
     return this
   }

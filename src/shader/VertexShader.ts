@@ -26,6 +26,7 @@ export default class VertexShader extends Shader {
     let variableIdx = 0
     let inputDefinitionSnippet = ''
     let outputDefinitionSnippet = ''
+    console.log(vertexBuffers)
     vertexBuffers.forEach(({ attributes }) => {
       for (const [key, { format }] of attributes) {
         const variableShaderFormat = Shader.getVertexInputFormat(format)

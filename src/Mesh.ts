@@ -74,6 +74,26 @@ export default class Mesh extends SceneObject {
     // - sampler inputs
     // - texture inputs
     // - custom user string snippets
+
+    const samplerInputs = samplers.map(({ name, wglslSamplerType }, i) => ({
+      bindIdx: numBindOffset + i,
+      name: name,
+      type: wglslSamplerType,
+    }))
+    const textureInputs = textures.map(({ name, wglslTextureType }, i) => ({
+      bindIdx: numBindOffset + samplers.length + i,
+      name: name,
+      type: `${wglslTextureType}`,
+    }))
+    const storageInputs = storages.map(
+      ({ stride, structDefinition, name }, i) => ({
+        bindIdx: numBindOffset + samplers.length + textures.length + i,
+        name,
+        attributes: structDefinition,
+        dataStride: stride,
+      }),
+    )
+
     const vertexShader = new VertexShader(device)
     const fragmentShader = new FragmentShader(device)
     {
@@ -81,31 +101,11 @@ export default class Mesh extends SceneObject {
       if (optionalUBOByteLength) {
         vertexShader.addUniformInputs(uniforms)
       }
-
       vertexShader
         .addShaderVars(geometry.vertexBuffers, vertexShaderSource.outputs)
-        .addSamplerInputs(
-          samplers.map(({ name, wglslSamplerType }, i) => ({
-            bindIdx: numBindOffset + i,
-            name: name,
-            type: wglslSamplerType,
-          })),
-        )
-        .addTextureInputs(
-          textures.map(({ name, wglslTextureType }, i) => ({
-            bindIdx: numBindOffset + samplers.length + i,
-            name: name,
-            type: `${wglslTextureType}`,
-          })),
-        )
-        .addStorages(
-          storages.map(({ dataStride, structDefinition, name }, i) => ({
-            bindIdx: numBindOffset + samplers.length + textures.length + i,
-            name,
-            attributes: structDefinition,
-            dataStride,
-          })),
-        )
+        .addSamplerInputs(samplerInputs)
+        .addTextureInputs(textureInputs)
+        .addStorages(storageInputs)
         .addHeadSnippet(vertexShaderSource.head)
         .addMainFnSnippet(vertexShaderSource.main)
     }
@@ -121,28 +121,9 @@ export default class Mesh extends SceneObject {
           fragmentShaderSource.inputs,
           fragmentShaderSource.outputs,
         )
-        .addSamplerInputs(
-          samplers.map(({ name, wglslSamplerType }, i) => ({
-            bindIdx: numBindOffset + i,
-            name: name,
-            type: wglslSamplerType,
-          })),
-        )
-        .addTextureInputs(
-          textures.map(({ name, wglslTextureType }, i) => ({
-            bindIdx: numBindOffset + samplers.length + i,
-            name: name,
-            type: `${wglslTextureType}`,
-          })),
-        )
-        .addStorages(
-          storages.map(({ name, dataStride, structDefinition }, i) => ({
-            dataStride,
-            bindIdx: numBindOffset + samplers.length + textures.length + i,
-            name,
-            attributes: structDefinition,
-          })),
-        )
+        .addSamplerInputs(samplerInputs)
+        .addTextureInputs(textureInputs)
+        .addStorages(storageInputs)
         .addHeadSnippet(fragmentShaderSource.head)
         .addMainFnSnippet(fragmentShaderSource.main)
     }
@@ -224,6 +205,7 @@ export default class Mesh extends SceneObject {
   render(
     renderPass: GPURenderPassEncoder,
     camera: PerspectiveCamera | OrthographicCamera,
+    indirectBuffer?: GPUBuffer,
   ): void {
     this.updateWorldMatrix(this.parentNode?.worldMatrix)
 
@@ -248,7 +230,7 @@ export default class Mesh extends SceneObject {
 
     this.uboBindGroup.bind(renderPass)
     renderPass.setPipeline(this.pipeline)
-    this.geometry.draw(renderPass)
+    this.geometry.draw(renderPass, indirectBuffer)
   }
 
   destroy(): void {

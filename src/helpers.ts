@@ -1,4 +1,4 @@
-import { UniformDefinition, UniformInputs } from '.'
+import { Uniform, UniformDefinition } from '.'
 import { UNIFORM_ALIGNMENT_SIZE_MAP } from './constants'
 
 // Uniform structs using std140 layout, so each block needs to be 16 bytes aligned
@@ -7,11 +7,12 @@ import { UNIFORM_ALIGNMENT_SIZE_MAP } from './constants'
 let _uniformBlockSpace = 16
 let _prevUniform: UniformDefinition
 let _uniformByteLength = 0
-export const alignUniformsToStd140Layout = (
-  uniforms: UniformInputs,
-): [number, UniformDefinition[]] => {
-  const uniformDefinitions: UniformDefinition[] = []
-  for (const uniform of Object.values(uniforms)) {
+export const alignUniformsToStd140Layout = (uniforms: {
+  [key: string]: Uniform
+}): [number, { [key: string]: UniformDefinition }] => {
+  const outUniforms: { [key: string]: UniformDefinition } = {}
+
+  for (const [key, uniform] of Object.entries(uniforms)) {
     const uniformSize = UNIFORM_ALIGNMENT_SIZE_MAP.get(uniform.type)
     if (!uniformSize) {
       throw new Error('cant find uniform mapping')
@@ -31,16 +32,15 @@ export const alignUniformsToStd140Layout = (
       _uniformBlockSpace = 16 - size
     }
 
-    const uniformDefinition = {
+    const augmentedUniform = {
       byteOffset: _uniformByteLength,
       byteSize: size,
       ...uniform,
     }
-
-    uniformDefinitions.push(uniformDefinition)
+    outUniforms[key] = augmentedUniform
 
     _uniformByteLength += size
-    _prevUniform = uniformDefinition
+    _prevUniform = augmentedUniform
     if (_uniformByteLength <= 0) {
       _uniformBlockSpace = 16
     }
@@ -50,7 +50,7 @@ export const alignUniformsToStd140Layout = (
   _prevUniform = null
   _uniformByteLength = 0
 
-  return [byteLength, uniformDefinitions]
+  return [byteLength, outUniforms]
 }
 
 // Borrowed from https://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/

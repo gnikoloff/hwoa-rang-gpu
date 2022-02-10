@@ -1,19 +1,17 @@
+import { BufferInput, UniformBufferInput } from '..'
 import BaseBuffer from './BaseBuffer'
 
 export default class UniformBuffer extends BaseBuffer {
-  public byteLength: number
-
   constructor(
     device: GPUDevice,
-    byteLength: GPUSize64,
-    usage = GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    {
+      usage = GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+      byteLength,
+      typedArray,
+      mappedAtCreation,
+      label,
+    }: BufferInput,
   ) {
-    super(device)
-    this.byteLength = byteLength
-
-    this.buffer = device.createBuffer({
-      size: byteLength,
-      usage,
-    })
+    super(device, { byteLength, typedArray, usage, mappedAtCreation, label })
   }
 }

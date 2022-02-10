@@ -1,9 +1,9 @@
+import { StorageBufferInput } from '..'
 import { WGLSL_BUFFER_ACCESS_MODE_TYPE, WGLSL_INPUT_TYPE } from '../interfaces'
 import BaseBuffer from './BaseBuffer'
 
 export default class StorageBuffer extends BaseBuffer {
-  public byteLength: number
-  public dataStride: number
+  public stride: number
   public usage: GPUBufferUsageFlags
 
   public name: string
@@ -11,22 +11,23 @@ export default class StorageBuffer extends BaseBuffer {
 
   constructor(
     device: GPUDevice,
-    data: Float32Array,
-    dataStride: number,
-    usage = GPUBufferUsage.STORAGE,
+    {
+      usage = GPUBufferUsage.STORAGE,
+      stride,
+      typedArray,
+      byteLength,
+      mappedAtCreation,
+      label,
+    }: StorageBufferInput,
   ) {
-    super(device)
-    this.byteLength = data.byteLength
-    this.dataStride = dataStride
-    this.usage = usage
-
-    this.buffer = device.createBuffer({
-      size: data.byteLength,
+    super(device, {
+      typedArray,
+      byteLength,
       usage,
-      mappedAtCreation: true,
+      mappedAtCreation,
+      label,
     })
-    new Float32Array(this.buffer.getMappedRange()).set(data)
-    this.buffer.unmap()
+    this.stride = stride
   }
 
   get wgslAccessMode(): WGLSL_BUFFER_ACCESS_MODE_TYPE {

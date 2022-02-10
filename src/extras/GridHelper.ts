@@ -49,12 +49,11 @@ export default class GridHelper extends Mesh {
         vertices[i * 6 + 11] = 0
       }
     }
-    const vertexBuffer = new VertexBuffer(
-      device,
-      0,
-      vertices,
-      3 * Float32Array.BYTES_PER_ELEMENT,
-    ).addAttribute(
+    const vertexBuffer = new VertexBuffer(device, {
+      bindPointIdx: 0,
+      typedArray: vertices,
+      stride: 3 * Float32Array.BYTES_PER_ELEMENT,
+    }).addAttribute(
       'position',
       0,
       3 * Float32Array.BYTES_PER_ELEMENT,

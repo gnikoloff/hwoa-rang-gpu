@@ -1,12 +1,9 @@
 import ComputeShader from './shader/ComputeShader'
 import StorageBuffer from './buffers/StorageBuffer'
 import BindGroup from './BindGroup'
-import {
-  GPUComputeInput,
-  UniformDefinition,
-  UniformsDefinitions,
-} from './interfaces'
+import { GPUComputeInput, UniformsDefinitions } from './interfaces'
 import { UNIFORM_ALIGNMENT_SIZE_MAP } from './constants'
+import { UniformDefinition } from '.'
 
 export class GPUCompute {
   private device: GPUDevice
@@ -90,12 +87,12 @@ export class GPUCompute {
     }
     computeShader
       .addStorages(
-        storages.map(({ dataStride, structDefinition, name }, i) => ({
+        storages.map(({ stride, structDefinition, name }, i) => ({
           // increment by 1 to account for the UBO at binding 0
           bindIdx: i + 1,
           name,
           attributes: structDefinition,
-          dataStride,
+          dataStride: stride,
         })),
       )
       .addHeadSnippet(shaderSource.head)

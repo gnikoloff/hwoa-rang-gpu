@@ -1,4 +1,5 @@
-import { WGLSL_INPUT_TYPE, UniformInputs } from '../interfaces'
+import { Uniform } from '..'
+import { WGLSL_INPUT_TYPE } from '../interfaces'
 
 const VERTEX_WGLSL_TYPES = new Map([
   ['float32', 'f32'],
@@ -43,7 +44,10 @@ export default class Shader {
     this.device = device
   }
 
-  addUniformInputs(uniforms: UniformInputs, bindIdx: number = 1): this {
+  addUniformInputs(
+    uniforms: { [key: string]: Uniform },
+    bindIdx: number = 1,
+  ): this {
     this.source += `
       struct UniformsInput {
         ${Object.entries(uniforms).reduce((acc, [key, { type }]) => {
