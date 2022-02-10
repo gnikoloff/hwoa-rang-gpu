@@ -54,18 +54,18 @@ export default class Mesh extends SceneObject {
     geometry.primitiveType = primitiveType
 
     const samplerInputs = samplers.map(({ name, wglslSamplerType }, i) => ({
-      bindIdx: i,
+      bindIdx: ubos.length + i,
       name: name,
       type: wglslSamplerType,
     }))
     const textureInputs = textures.map(({ name, wglslTextureType }, i) => ({
-      bindIdx: samplers.length + i,
+      bindIdx: ubos.length + samplers.length + i,
       name: name,
       type: `${wglslTextureType}`,
     }))
     const storageInputs = storages.map(
       ({ stride, structDefinition, name }, i) => ({
-        bindIdx: samplers.length + textures.length + i,
+        bindIdx: ubos.length + samplers.length + textures.length + i,
         name,
         attributes: structDefinition,
         dataStride: stride,
@@ -93,6 +93,9 @@ export default class Mesh extends SceneObject {
       .addStorages(storageInputs)
       .addHeadSnippet(fragmentShaderSource.head)
       .addMainFnSnippet(fragmentShaderSource.main)
+
+    // console.log(vertexShader.source)
+    console.log(fragmentShader.source)
 
     this.uboBindGroup = new BindGroup(device, 0)
 

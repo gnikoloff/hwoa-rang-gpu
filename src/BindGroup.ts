@@ -149,7 +149,6 @@ export default class BindGroup {
       layout: this.getLayout(),
       entries,
     })
-    console.log(this.bindGroup)
     return this
   }
 
