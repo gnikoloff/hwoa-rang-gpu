@@ -15,8 +15,6 @@ import Geometry from './Geometry'
 import Mesh from './Mesh'
 export { GPUCompute } from './GPUCompute'
 
-import GridHelper from './extras/GridHelper'
-
 export {
   IndexBuffer,
   VertexBuffer,
@@ -31,7 +29,6 @@ export {
   Texture,
   Geometry,
   Mesh,
-  GridHelper,
 }
 
 export {

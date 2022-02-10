@@ -17,7 +17,7 @@ export default class StorageBuffer extends BaseBuffer {
       typedArray,
       byteLength,
       mappedAtCreation,
-      label,
+      debugLabel,
     }: StorageBufferInput,
   ) {
     super(device, {
@@ -25,7 +25,7 @@ export default class StorageBuffer extends BaseBuffer {
       byteLength,
       usage,
       mappedAtCreation,
-      label,
+      debugLabel,
     })
     this.stride = stride
   }

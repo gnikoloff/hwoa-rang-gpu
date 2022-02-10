@@ -1,17 +1,21 @@
 import ComputeShader from './shader/ComputeShader'
 import StorageBuffer from './buffers/StorageBuffer'
 import BindGroup from './BindGroup'
-import { GPUComputeInput, UniformsDefinitions } from './interfaces'
+import { GPUComputeInput } from './interfaces'
 import { UNIFORM_ALIGNMENT_SIZE_MAP } from './constants'
 import { UniformDefinition } from '.'
 
+/**
+ * This needs a total rewrite, have to learn compute shaders first
+ * @deprecated
+ */
 export class GPUCompute {
   private device: GPUDevice
   private workgroupSize: number[]
   private uboBindGroup?: BindGroup
   private pipeline: GPUComputePipeline
 
-  public uniforms: UniformsDefinitions = {}
+  public uniforms = {}
   public storages: StorageBuffer[]
 
   constructor(
@@ -67,23 +71,23 @@ export class GPUCompute {
       }
     }
 
-    this.uboBindGroup = new BindGroup(device, 0).addUBO(
-      uniformsInputUBOByteLength,
-    )
+    // this.uboBindGroup = new BindGroup(device, 0).addUBO(
+    //   uniformsInputUBOByteLength,
+    // )
 
-    if (uniformsInputUBOByteLength) {
-      // Pass optional initial uniform values
-      for (const { value, byteOffset } of Object.values(this.uniforms)) {
-        this.uboBindGroup.writeToUBO(0, byteOffset, value)
-      }
-    }
+    // if (uniformsInputUBOByteLength) {
+    //   // Pass optional initial uniform values
+    //   for (const { value, byteOffset } of Object.values(this.uniforms)) {
+    //     // this.uboBindGroup.writeToUBO(0, byteOffset, value)
+    //   }
+    // }
     // Supply storages to bind group
     storages.forEach((storage) => this.uboBindGroup.addStorage(storage))
 
     // Construct a compute shader based on inputs
     const computeShader = new ComputeShader(device)
     if (uniformsInputUBOByteLength) {
-      computeShader.addUniformInputs(uniforms, 0)
+      // computeShader.addUniformInputs(uniforms, 0)
     }
     computeShader
       .addStorages(
@@ -112,16 +116,7 @@ export class GPUCompute {
     }
     this.pipeline = device.createComputePipeline(pipelineDesc)
 
-    this.uboBindGroup.attachToPipeline(this.pipeline)
-  }
-
-  setUniform(name: string, value: SharedArrayBuffer | ArrayBuffer): this {
-    const uniform = this.uniforms[name]
-    if (!uniform) {
-      throw new Error('Uniform does not belong to UBO')
-    }
-    this.uboBindGroup.writeToUBO(0, uniform.byteOffset, value)
-    return this
+    // this.uboBindGroup.attachToPipeline(this.pipeline)
   }
 
   dispatch(

@@ -22,7 +22,7 @@ export default class VertexBuffer extends BaseBuffer {
       byteLength,
       bindPointIdx,
       mappedAtCreation,
-      label,
+      debugLabel,
     }: VertexBufferInput,
   ) {
     super(device, {
@@ -30,7 +30,7 @@ export default class VertexBuffer extends BaseBuffer {
       byteLength,
       usage,
       mappedAtCreation,
-      label,
+      debugLabel,
     })
     this.bindPointIdx = bindPointIdx
     this.stride = stride

@@ -1,4 +1,4 @@
-import { Uniform } from '..'
+import { Uniform, UniformBuffer } from '..'
 import { WGLSL_INPUT_TYPE } from '../interfaces'
 
 const VERTEX_WGLSL_TYPES = new Map([
@@ -44,20 +44,25 @@ export default class Shader {
     this.device = device
   }
 
-  addUniformInputs(
-    uniforms: { [key: string]: Uniform },
-    bindIdx: number = 1,
-  ): this {
-    this.source += `
-      struct UniformsInput {
-        ${Object.entries(uniforms).reduce((acc, [key, { type }]) => {
-          acc += `${key}: ${type};`
-          return acc
-        }, '')}
-      };
+  addUniformInputs(ubos: UniformBuffer[]): this {
+    for (const [i, ubo] of ubos.entries()) {
+      this.source += `
+        struct ${ubo.name} {
+      `
 
-      @group(0) @binding(${bindIdx}) var<uniform> inputUBO: UniformsInput;
-    `
+      for (const [key, uniform] of Object.entries(ubo.uniforms)) {
+        this.source += `
+          ${key}: ${uniform.type};
+        `
+      }
+
+      this.source += `
+        }
+        @group(0) @binding(${i}) var <uniform> ${ubo.name.toLowerCase()}: ${
+        ubo.name
+      };
+      `
+    }
     return this
   }
 

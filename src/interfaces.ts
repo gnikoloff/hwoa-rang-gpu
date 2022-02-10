@@ -1,4 +1,4 @@
-import { Geometry, Sampler, StorageBuffer, Texture } from '.'
+import { Geometry, Sampler, StorageBuffer, Texture, UniformBuffer } from '.'
 
 export type TYPED_ARRAY =
   | Float32Array
@@ -68,19 +68,6 @@ export interface UniformDefinition extends Uniform {
   byteSize: GPUSize64
 }
 
-export interface UniformsDefinitions {
-  [key: string]: UniformDefinition
-}
-
-export interface StorageEntry {
-  /**
-   *
-   */
-  attributes: { [key: string]: WGLSL_INPUT_TYPE }
-  value: Float32Array
-  stride: number
-}
-
 export interface ShaderDefinition {
   outputs?: { [key: string]: ShaderIOVar }
   inputs?: { [key: string]: ShaderIOVar }
@@ -93,9 +80,7 @@ export interface MeshInput {
   geometry: Geometry
   vertexShaderSource: ShaderDefinition
   fragmentShaderSource: ShaderDefinition
-  uniforms?: {
-    [key: string]: Uniform
-  }
+  ubos?: UniformBuffer[]
   storages?: StorageBuffer[]
   textures?: Texture[]
   samplers?: Sampler[]
@@ -114,10 +99,15 @@ export interface BufferInput {
   byteLength?: number
   usage?: GPUBufferUsageFlags
   mappedAtCreation?: boolean
-  label?: string
+  debugLabel?: string
 }
 
-export interface UniformBufferInput extends BufferInput {}
+export interface UniformBufferInput {
+  name: string
+  uniforms: { [key: string]: Uniform }
+  usage?: GPUBufferUsageFlags
+  debugLabel?: string
+}
 
 export interface IndexBufferInput extends BufferInput {}
 

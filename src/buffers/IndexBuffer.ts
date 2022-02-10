@@ -17,10 +17,16 @@ export default class IndexBuffer extends BaseBuffer {
       typedArray,
       byteLength,
       mappedAtCreation,
-      label,
+      debugLabel,
     }: IndexBufferInput,
   ) {
-    super(device, { typedArray, byteLength, usage, mappedAtCreation, label })
+    super(device, {
+      typedArray,
+      byteLength,
+      usage,
+      mappedAtCreation,
+      debugLabel,
+    })
   }
 
   bind(renderPass: GPURenderPassEncoder): this {

@@ -10,7 +10,7 @@ export default class BindGroup {
   public bindingIndex: number
   public samplers: Sampler[] = []
   public textures: Texture[] = []
-  public uniformBlocks: UniformBuffer[] = []
+  public ubos: UniformBuffer[] = []
   public storageBuffers: StorageBuffer[] = []
 
   constructor(device: GPUDevice, bindingIndex = 0) {
@@ -38,25 +38,8 @@ export default class BindGroup {
     return this
   }
 
-  addUBO(byteLength): this {
-    const uniformBlock = new UniformBuffer(this.device, {
-      byteLength,
-    })
-    this.uniformBlocks.push(uniformBlock)
-    return this
-  }
-
-  writeToUBO(
-    uboIdx: number,
-    byteOffset: number,
-    data: SharedArrayBuffer | ArrayBuffer,
-  ): this {
-    const ubo = this.uniformBlocks[uboIdx]
-    if (!ubo) {
-      console.error('UBO not found')
-      return this
-    }
-    ubo.write(byteOffset, data)
+  addUBO(ubo: UniformBuffer): this {
+    this.ubos.push(ubo)
     return this
   }
 
@@ -65,7 +48,7 @@ export default class BindGroup {
 
     let accBindingIndex = 0
 
-    this.uniformBlocks.forEach(() => {
+    this.ubos.forEach(() => {
       entries.push({
         visibility:
           GPUShaderStage.VERTEX |
@@ -117,12 +100,12 @@ export default class BindGroup {
     })
   }
 
-  attachToPipeline(pipeline: GPURenderPipeline | GPUComputePipeline): this {
+  init(): this {
     const entries: GPUBindGroupEntry[] = []
 
     let accBindingIndex = 0
 
-    this.uniformBlocks.forEach((bufferBlock) => {
+    this.ubos.forEach((bufferBlock) => {
       entries.push({
         binding: accBindingIndex,
         resource: {
@@ -163,14 +146,15 @@ export default class BindGroup {
     })
 
     this.bindGroup = this.device.createBindGroup({
-      layout: pipeline.getBindGroupLayout(this.bindingIndex),
+      layout: this.getLayout(),
       entries,
     })
+    console.log(this.bindGroup)
     return this
   }
 
   destroy(): void {
-    this.uniformBlocks.forEach((ubo) => ubo.destroy())
+    this.ubos.forEach((ubo) => ubo.destroy())
     this.textures.forEach((texture) => texture.destroy())
     this.samplers.forEach((sampler) => sampler.destroy())
     this.storageBuffers.forEach((storageBuffer) => storageBuffer.destroy())

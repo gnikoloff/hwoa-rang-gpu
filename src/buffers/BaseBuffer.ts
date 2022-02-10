@@ -15,7 +15,7 @@ export default class BaseBuffer {
       byteLength,
       usage,
       mappedAtCreation = false,
-      label,
+      debugLabel,
     }: BufferInput,
   ) {
     this.device = device
@@ -28,7 +28,7 @@ export default class BaseBuffer {
         size: typedArray.byteLength,
         usage,
         mappedAtCreation: true,
-        label,
+        label: debugLabel,
       })
       if (typedArray instanceof Float32Array) {
         new Float32Array(this.buffer.getMappedRange()).set(typedArray)
@@ -54,7 +54,7 @@ export default class BaseBuffer {
         size: byteLength,
         usage,
         mappedAtCreation,
-        label,
+        label: debugLabel,
       })
     }
   }
