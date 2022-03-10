@@ -6,16 +6,22 @@ import Texture from './Texture'
 export default class BindGroup {
   private device: GPUDevice
   private bindGroup!: GPUBindGroup
+  private debugLabel?: string
 
-  public bindingIndex: number
-  public samplers: Sampler[] = []
-  public textures: Texture[] = []
-  public ubos: UniformBuffer[] = []
-  public storageBuffers: StorageBuffer[] = []
+  bindingIndex: number
+  samplers: Sampler[] = []
+  textures: Texture[] = []
+  ubos: UniformBuffer[] = []
+  storageBuffers: StorageBuffer[] = []
 
-  constructor(device: GPUDevice, bindingIndex = 0) {
+  constructor(device: GPUDevice, bindingIndex = 0, debugLabel?: string) {
     this.device = device
     this.bindingIndex = bindingIndex
+    this.debugLabel = debugLabel
+  }
+
+  get() {
+    return this.bindGroup
   }
 
   bind(renderPass: GPURenderPassEncoder | GPUComputePassEncoder): this {
@@ -97,6 +103,7 @@ export default class BindGroup {
 
     return this.device.createBindGroupLayout({
       entries,
+      label: this.debugLabel,
     })
   }
 
@@ -148,6 +155,7 @@ export default class BindGroup {
     this.bindGroup = this.device.createBindGroup({
       layout: this.getLayout(),
       entries,
+      label: this.debugLabel,
     })
     return this
   }
