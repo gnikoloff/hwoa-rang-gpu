@@ -7,7 +7,6 @@ import Shader from './shader/Shader'
 import BindGroup from './BindGroup'
 import VertexShader from './shader/VertexShader'
 import FragmentShader from './shader/FragmentShader'
-import PipelineCache from './PipelineCache'
 import UniformBuffer from './buffers/UniformBuffer'
 
 import { MeshInput } from './interfaces'
@@ -93,9 +92,7 @@ export default class Mesh extends SceneObject {
       .addStorages(storageInputs)
       .addHeadSnippet(fragmentShaderSource.head)
       .addMainFnSnippet(fragmentShaderSource.main)
-
-    // console.log(vertexShader.source)
-    console.log(fragmentShader.source)
+    // console.log(fragmentShader.source)
 
     this.uboBindGroup = new BindGroup(device, 0)
 
@@ -139,8 +136,9 @@ export default class Mesh extends SceneObject {
     }
 
     // Reuse pipelines from a pool
-    PipelineCache.device = device
-    this.pipeline = PipelineCache.instance.getRenderPipeline(pipelineDesc)
+    // PipelineCache.device = device
+    // this.pipeline = PipelineCache.instance.getRenderPipeline(pipelineDesc)
+    this.pipeline = this.device.createRenderPipeline(pipelineDesc)
   }
 
   render(renderPass: GPURenderPassEncoder, indirectBuffer?: GPUBuffer): void {
