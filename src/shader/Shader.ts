@@ -4,7 +4,7 @@ import { WGLSL_INPUT_TYPE } from '../interfaces'
 const VERTEX_WGLSL_TYPES = new Map([
   ['float32', 'f32'],
   ['float32x2', 'vec2<f32>'],
-  ['float32x3', 'vec4<f32>'], // Exception: want to "autofill" vertex geometry inputs as vec4s, webgl style
+  ['float32x3', 'vec3<f32>'],
   ['float32x4', 'vec4<f32>'],
   ['sint32', 'i32'],
   ['sint32x2', 'vec2<i32>'],
@@ -52,7 +52,7 @@ export default class Shader {
 
       for (const [key, uniform] of Object.entries(ubo.uniforms)) {
         this.source += `
-          ${key}: ${uniform.type};
+          ${key}: ${uniform.type},
         `
       }
 

@@ -19,7 +19,7 @@ export default class FragmentShader extends Shader {
           console.error('shader vertex variable has no proper wglsl format')
         }
         inputDefinitionSnippet += `
-          @location(${inputVariableIdx}) ${key}: ${variableShaderFormat};
+          @location(${inputVariableIdx}) ${key}: ${variableShaderFormat},
         `
         inputVariableIdx++
       }
@@ -30,7 +30,7 @@ export default class FragmentShader extends Shader {
         console.error('shader vertex variable has no proper wglsl format')
       }
       inputDefinitionSnippet += `
-        @location(${inputVariableIdx}) ${key}: ${variableShaderFormat};
+        @location(${inputVariableIdx}) ${key}: ${variableShaderFormat},
       `
       inputVariableIdx++
     }
@@ -40,18 +40,18 @@ export default class FragmentShader extends Shader {
         console.error('shader vertex variable has no proper wglsl format')
       }
       outputDefinitionSnippet += `
-        @location(${outputVariableIdx + 1}) ${key}: ${variableShaderFormat};
+        @location(${outputVariableIdx + 1}) ${key}: ${variableShaderFormat},
       `
       outputVariableIdx++
     }
     this.source += `
       struct Input {
-        @builtin(position) coords: vec4<f32>;
+        @builtin(position) coords: vec4<f32>,
         ${inputDefinitionSnippet}
       };
 
       struct Output {
-        @location(0) Color: vec4<f32>;
+        @location(0) Color: vec4<f32>,
         ${outputDefinitionSnippet}
       };
     `
